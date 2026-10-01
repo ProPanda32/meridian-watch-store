@@ -68,7 +68,7 @@ function render(){state=store.load();document.title=state.settings.name+' | Time
 }
 function bagStepper(product){
   const quantity=bag.get(product.id)||0;
-  return `<div class="bag-stepper" role="group" aria-label="${esc(product.name)} bag quantity"><button data-decrease="${product.id}" aria-label="Remove one ${esc(product.name)} from bag" ${quantity?'':'disabled'}>−</button><span data-bag-quantity="${product.id}" aria-label="${quantity} in bag">${quantity}</span><button data-add="${product.id}" aria-label="Add one ${esc(product.name)} to bag" ${quantity>=product.stock?'disabled':''}>+</button></div>`;
+  return `<div class="bag-controls" data-bag-controls="${product.id}"><button class="bag-add-button" data-add="${product.id}" ${quantity?'hidden':''} ${product.stock?'':'disabled'}>${product.stock?'Add to bag':'Sold out'}</button><div class="bag-stepper" ${quantity?'':'hidden'} role="group" aria-label="${esc(product.name)} bag quantity"><button data-decrease="${product.id}" aria-label="Remove one ${esc(product.name)} from bag" ${quantity?'':'disabled'}>−</button><span data-bag-quantity="${product.id}" aria-label="${quantity} in bag">${quantity}</span><button data-add="${product.id}" aria-label="Add one ${esc(product.name)} to bag" ${quantity>=product.stock?'disabled':''}>+</button></div></div>`;
 }
 function removeOneFromBag(id){
   const quantity=bag.get(id)||0;
@@ -77,6 +77,17 @@ function removeOneFromBag(id){
   renderBag();toast('Removed one from your bag');
 }
 function syncBagIndicators(){
+  for(const controls of document.querySelectorAll('[data-bag-controls]')){
+    const product=state.products.find(p=>p.id===controls.dataset.bagControls);
+    const quantity=bag.get(controls.dataset.bagControls)||0;
+    const add=controls.querySelector('.bag-add-button');
+    const stepper=controls.querySelector('.bag-stepper');
+    const focused=controls.contains(document.activeElement);
+    const changed=add.hidden!==Boolean(quantity);
+    add.hidden=Boolean(quantity);stepper.hidden=!quantity;
+    add.textContent=product?.stock?'Add to bag':'Sold out';
+    if(changed&&focused)(quantity?stepper.querySelector('[data-add]'):add).focus();
+  }
   for(const button of document.querySelectorAll('[data-decrease]'))button.disabled=!bag.get(button.dataset.decrease);
   for(const counter of document.querySelectorAll('[data-bag-quantity]')){
     const quantity=bag.get(counter.dataset.bagQuantity)||0;

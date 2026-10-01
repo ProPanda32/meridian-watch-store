@@ -180,4 +180,6 @@ dialog::backdrop{background:#0008}
 .bag-stepper button:hover:not(:disabled){background:#e7e7e0}
 .bag-stepper button:disabled{opacity:.3;cursor:not-allowed}
 .bag-stepper span{min-width:28px;text-align:center;font-size:14px;font-variant-numeric:tabular-nums}
-#detail-bag-controls .bag-stepper{margin-top:16px}
+.bag-controls{display:flex;flex:1;min-width:0}
+.bag-add-button,.product-actions .bag-add-button{width:100%;min-height:44px;padding:12px 18px;border:1px solid var(--ink);background:var(--ink);color:var(--paper);font-size:13px}
+#detail-bag-controls .bag-controls{margin-top:16px;width:max-content}
