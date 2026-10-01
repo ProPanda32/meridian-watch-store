@@ -61,7 +61,11 @@
     hero.style.setProperty('--copy-y', `${-progress * 40}px`);
     hero.style.setProperty('--copy-opacity', String(opacity));
     copy.inert = opacity < .05;
-    header.classList.toggle('is-scrolled', window.scrollY > 8);
+    // Tie the header directly to scroll distance so reversing direction never
+    // restarts a timed transition at a threshold.
+    const headerProgress = Math.min(1, Math.max(0, window.scrollY) / 140);
+    const headerBlend = motion.matches ? Number(window.scrollY > 8) : headerProgress * headerProgress * (3 - 2 * headerProgress);
+    header.style.setProperty('--header-blend', String(headerBlend));
   }
   function scheduleScroll() {
     if (!frame) frame = requestAnimationFrame(updateScroll);
