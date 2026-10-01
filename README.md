@@ -85,7 +85,7 @@ Navigation and playback icons use Lucide geometry; its license is included in `a
 
 The uploaded collage is preserved as `sources/merlock-five-watch-collection.png`. Its five panels are cropped without the dividing lines into optimized WebP files in `assets/watches/`. The Verdant, Mariner, Obsidian, Argent and Voyager join the two existing watches in the storefront, search, checkout and admin catalogue. Names, prices and initial stock levels are illustrative and editable in admin; descriptions refer to the visible designs rather than verified specifications.
 
-Returning browsers receive the five new listings once without changing existing products, custom edits or order snapshots. Once saved, the migration marker also preserves later edits and deletions to the new products. Product cards use centered square framing, trimming excess landscape background while preserving the watches. The tall Selene photo fits within the square to preserve its bracelet. The Aster listing and its skeleton image have been removed; historical order snapshots remain intact.
+Returning browsers receive the five new listings once without changing existing products, custom edits or order snapshots. Once saved, the migration marker also preserves later edits and deletions to the new products. Product cards use centered square framing, trimming excess landscape background while preserving the watches. The Selene photo has a seamlessly extended square studio background, preserving its whole bracelet and matching the other product cards without side bars. The Aster listing and its skeleton image have been removed; historical order snapshots remain intact.
 
 ## Background piano
 
