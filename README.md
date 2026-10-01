@@ -117,6 +117,7 @@ An active watch with zero stock remains in its collection with a Sold out badge 
 
 Switching watch tabs uses a short fade-out followed by a gentle fade-and-slide in, with animated panel height between All watches and smaller groups. Rapid selections cancel earlier transitions. Reduced-motion visitors switch immediately.
 
-Add buttons show each watch’s current in-bag quantity and update after adding, changing quantity or removing an item. The shopping bag includes square watch thumbnails beside each item.
+The shopping bag includes square watch thumbnails beside each item.
 
-Watches already in the bag also show a Remove one from bag control under their collection buttons. Each click reduces the quantity by one, removes the item at zero, and updates its count, the bag total and checkout state. The bag retains its minus and Remove controls.
+
+Collection cards and product details now use compact minus/quantity/plus controls for bag quantities. Minus is disabled at zero; plus is disabled when the bag reaches available stock.

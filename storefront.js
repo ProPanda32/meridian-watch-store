@@ -64,12 +64,11 @@ function render(){state=store.load();document.title=state.settings.name+' | Time
   const visibleProducts=collectionProducts(selectedCollection);
   $('products').setAttribute('aria-labelledby','collection-tab-'+selectedCollection);
   $('collection-status').textContent=`Showing ${visibleProducts.length} ${visibleProducts.length===1?'watch':'watches'}.`;
-  $('products').innerHTML=visibleProducts.map(p=>`<article><div class="product-image"><img src="${esc(p.image)}" alt="${esc(p.style)} watch" loading="lazy"><span class="badge${p.stock===0?' sold-out-badge':''}">${p.stock===0?'Sold out':esc(p.badge)}</span></div><div class="product-info"><div><h3>${esc(p.name)}</h3><p>${esc(p.style)}</p></div><span class="price">${money(p.price)}</span></div><div class="product-actions"><button data-details="${p.id}">View details</button><button data-add="${p.id}" ${p.stock===0?'disabled':''}>${addButtonContent(p)}</button></div><button class="remove-from-bag" data-decrease="${p.id}" aria-label="Remove one ${esc(p.name)} from bag" ${bag.get(p.id)?'':'hidden'}>− Remove one from bag</button></article>`).join('')||'<p>No watches are currently available in this collection.</p>';renderBag();
+  $('products').innerHTML=visibleProducts.map(p=>`<article><div class="product-image"><img src="${esc(p.image)}" alt="${esc(p.style)} watch" loading="lazy"><span class="badge${p.stock===0?' sold-out-badge':''}">${p.stock===0?'Sold out':esc(p.badge)}</span></div><div class="product-info"><div><h3>${esc(p.name)}</h3><p>${esc(p.style)}</p></div><span class="price">${money(p.price)}</span></div><div class="product-actions"><button data-details="${p.id}">View details</button>${bagStepper(p)}</div></article>`).join('')||'<p>No watches are currently available in this collection.</p>';renderBag();
 }
-function addButtonContent(product){
-  if(product.stock===0)return 'Sold out';
+function bagStepper(product){
   const quantity=bag.get(product.id)||0;
-  return 'Add to bag'+(quantity?` <span class="bag-quantity">${quantity} in bag</span>`:'');
+  return `<div class="bag-stepper" role="group" aria-label="${esc(product.name)} bag quantity"><button data-decrease="${product.id}" aria-label="Remove one ${esc(product.name)} from bag" ${quantity?'':'disabled'}>−</button><span data-bag-quantity="${product.id}" aria-label="${quantity} in bag">${quantity}</span><button data-add="${product.id}" aria-label="Add one ${esc(product.name)} to bag" ${quantity>=product.stock?'disabled':''}>+</button></div>`;
 }
 function removeOneFromBag(id){
   const quantity=bag.get(id)||0;
@@ -78,28 +77,29 @@ function removeOneFromBag(id){
   renderBag();toast('Removed one from your bag');
 }
 function syncBagIndicators(){
-  for(const button of document.querySelectorAll('[data-decrease]'))button.hidden=!bag.get(button.dataset.decrease);
+  for(const button of document.querySelectorAll('[data-decrease]'))button.disabled=!bag.get(button.dataset.decrease);
+  for(const counter of document.querySelectorAll('[data-bag-quantity]')){
+    const quantity=bag.get(counter.dataset.bagQuantity)||0;
+    counter.textContent=quantity;counter.setAttribute('aria-label',`${quantity} in bag`);
+  }
   for(const button of document.querySelectorAll('[data-add]')){
     const product=state.products.find(p=>p.id===button.dataset.add);
-    if(!product)continue;
-    button.innerHTML=addButtonContent(product);
-    const quantity=bag.get(product.id)||0;
-    button.setAttribute('aria-label',product.stock===0?`${product.name} is sold out`:`Add ${product.name} to bag${quantity?`, ${quantity} already in bag`:''}`);
+    button.disabled=!product||!product.active||(bag.get(product.id)||0)>=product.stock;
   }
 }
 function bagItems(){return [...bag].map(([id,quantity])=>({product:state.products.find(p=>p.id===id),quantity}));}
 function renderBag(){const items=bagItems();$('bag-count').textContent=items.reduce((s,i)=>s+i.quantity,0);$('cart-items').innerHTML=items.length?items.map(({product:p,quantity:q})=>`<div class="cart-row"><img class="cart-watch-image" src="${esc(p.image)}" alt="${esc(p.name)} — ${esc(p.style)}" width="72" height="72"><div><p>${esc(p.name)}</p><div class="quantity"><button data-quantity="${p.id}" data-delta="-1" aria-label="Decrease ${esc(p.name)} quantity">−</button><span>${q}</span><button data-quantity="${p.id}" data-delta="1" aria-label="Increase ${esc(p.name)} quantity" ${q>=p.stock?'disabled':''}>+</button><button class="remove" data-remove="${p.id}" style="width:auto">Remove</button></div></div><span class="cart-line-price">${money(p.price*q)}</span></div>`).join(''):'<p class="details">Your bag is empty. Find a watch that feels like you.</p>';$('subtotal').textContent=money(items.reduce((s,i)=>s+i.quantity*i.product.price,0));$('checkout-button').disabled=!items.length;if($('checkout-dialog').open)renderCheckout();syncBagIndicators();syncDetailsStock();}
-function addToBag(id){state=store.load();const p=state.products.find(p=>p.id===id);if(!p||!p.active)throw Error('Unknown product');if(p.stock===0){render();toast('This watch is sold out');return {error:'Insufficient stock'};}if((bag.get(id)||0)>=p.stock){toast('No more stock available');return {error:'Insufficient stock'};}bag.set(id,(bag.get(id)||0)+1);render();toast('Added to your bag');return {product:id,quantity:bag.get(id),totalItems:[...bag.values()].reduce((a,b)=>a+b,0)};}
+function addToBag(id){state=store.load();const p=state.products.find(p=>p.id===id);if(!p||!p.active)throw Error('Unknown product');if(p.stock===0){render();toast('This watch is sold out');return {error:'Insufficient stock'};}if((bag.get(id)||0)>=p.stock){toast('No more stock available');return {error:'Insufficient stock'};}bag.set(id,(bag.get(id)||0)+1);renderBag();toast('Added to your bag');return {product:id,quantity:bag.get(id),totalItems:[...bag.values()].reduce((a,b)=>a+b,0)};}
 function syncDetailsStock(){
   if(!detailProductId)return;
   const product=state.products.find(p=>p.id===detailProductId&&p.active);
-  $('detail-add').disabled=!product||product.stock===0;
-  $('detail-add').innerHTML=!product?'Unavailable':addButtonContent(product);
-  $('detail-remove').dataset.decrease=detailProductId;
-  $('detail-remove').hidden=!bag.get(detailProductId);
-  $('detail-remove').setAttribute('aria-label',`Remove one ${product?.name||'watch'} from bag`);
+  const controls=$('detail-bag-controls');
+  if(!product){controls.textContent='Unavailable';controls.dataset.product='';return;}
+  if(controls.dataset.product!==product.id){controls.innerHTML=bagStepper(product);controls.dataset.product=product.id;}
+  $('detail-stock-status').textContent=product.stock===0?'Sold out':'';
+  syncBagIndicators();
 }
-function showDetails(id){state=store.load();const p=state.products.find(p=>p.id===id&&p.active);if(!p)return;const img=$('detail-img');img.src=p.image;img.alt=p.style+' watch';$('detail-title').textContent=p.name;$('detail-copy').textContent=p.description+' '+money(p.price);detailProductId=id;syncDetailsStock();$('detail-add').onclick=()=>{const result=addToBag(id);if(!result.error)$('details-dialog').close();else syncDetailsStock();};$('details-dialog').showModal();}
+function showDetails(id){state=store.load();const p=state.products.find(p=>p.id===id&&p.active);if(!p)return;const img=$('detail-img');img.src=p.image;img.alt=p.style+' watch';$('detail-title').textContent=p.name;$('detail-copy').textContent=p.description+' '+money(p.price);detailProductId=id;syncDetailsStock();$('details-dialog').showModal();}
 function openBag(){render();$('bag-dialog').showModal();}
 function renderCheckout(){const items=bagItems();$('checkout-summary').innerHTML=items.map(({product:p,quantity:q})=>`<p>${esc(p.name)} × ${q} — ${money(p.price*q)}</p>`).join('')+`<div class="total"><strong>Total</strong><strong>${money(items.reduce((s,i)=>s+i.quantity*i.product.price,0))}</strong></div>`;$('place-order').disabled=!bag.size;}
 function startCheckout(){render();if(!bag.size)return;$('bag-dialog').close();$('checkout-error').textContent='';renderCheckout();$('checkout-dialog').showModal();}

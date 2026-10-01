@@ -61,7 +61,6 @@ h2{font-family:Georgia,serif;font-size:40px;font-weight:normal;line-height:1.2;m
 .price{font-size:14px;padding-top:3px;white-space:nowrap}
 .product-actions{display:flex;gap:10px;margin-top:20px}
 .product-actions button{padding:12px 10px;border:1px solid #bfc2bb;background:transparent;font-size:13px;flex:1;min-width:0;min-height:44px}
-.product-actions button:last-child{background:#202522;color:#fff;border-color:#202522}
 .editorial{margin:0 5% 80px;padding:48px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);display:grid;grid-template-columns:1fr 1fr;gap:70px}
 .editorial h2{font-size:38px}
 .editorial p:not(.eyebrow){margin:0;line-height:1.9;color:#5e625d;max-width:520px}
@@ -170,9 +169,15 @@ dialog::backdrop{background:#0008}
 
 @media(prefers-reduced-motion:reduce){.music-volume-panel{transition:none;transform:none}}
 
-.bag-quantity{display:inline-block;margin-left:5px;padding:3px 6px;border-radius:12px;background:#ffffff24;color:inherit;font-size:11px;white-space:nowrap}
 .cart-watch-image{width:72px;height:72px;object-fit:cover;display:block;background:#131918}
 .cart-line-price{white-space:nowrap}
 @media(max-width:420px){.cart-row{grid-template-columns:60px minmax(0,1fr);gap:12px}.cart-watch-image{width:60px;height:60px}.cart-line-price{grid-column:2}}
 
-.remove-from-bag{display:inline-flex;align-items:center;min-height:40px;margin-top:4px;padding:8px 0;border:0;background:transparent;color:#5a635a;font-size:12px;text-decoration:underline;text-underline-offset:3px}
+
+
+.bag-stepper{display:flex;align-items:center;flex:0 0 auto;width:max-content;border:1px solid #bfc2bb}
+.bag-stepper button,.product-actions .bag-stepper button{flex:0 0 44px;width:44px;min-height:44px;padding:0;border:0;background:transparent;color:var(--ink);font-size:22px;line-height:1}
+.bag-stepper button:hover:not(:disabled){background:#e7e7e0}
+.bag-stepper button:disabled{opacity:.3;cursor:not-allowed}
+.bag-stepper span{min-width:28px;text-align:center;font-size:14px;font-variant-numeric:tabular-nums}
+#detail-bag-controls .bag-stepper{margin-top:16px}
