@@ -146,12 +146,15 @@ dialog::backdrop{background:#0008}
   .product-image img,.reveal,.site-header{transition:none}
 }
 
-.music-controls{position:fixed;right:20px;bottom:20px;z-index:35;display:flex;align-items:center;gap:14px;background:var(--paper);color:var(--ink);border:1px solid #c9c9c2;border-radius:28px;padding:4px 16px 4px 8px;box-shadow:0 4px 20px #0002}
-.music-controls button{display:flex;align-items:center;gap:9px;min-height:44px;border:0;border-radius:22px;padding:0 10px;background:transparent;color:inherit;font-size:12px}
-.music-controls .icon{width:15px;height:15px}
-.music-controls input{width:64px;min-height:44px;accent-color:#202522;cursor:pointer}
-.music-ready .toast{bottom:88px}
-@media(max-width:600px){.music-controls{right:12px;bottom:12px;gap:6px}}
+.music-controls{position:relative;display:flex;align-items:center;color:inherit}
+.music-controls button{position:relative;border-radius:50%}
+.music-off-line{position:absolute;width:25px;height:1.5px;background:currentColor;transform:rotate(-45deg);box-shadow:0 0 2px var(--paper);pointer-events:none}
+.music-controls button[aria-pressed="true"] .music-off-line{display:none}
+.music-volume-panel{position:absolute;top:calc(100% + 8px);right:0;width:160px;padding:14px;background:var(--paper);color:var(--ink);border:1px solid var(--line);box-shadow:0 4px 16px #0002;visibility:hidden;opacity:0;transition:opacity .2s;text-shadow:none}
+.music-controls:hover .music-volume-panel,.music-controls:focus-within .music-volume-panel{visibility:visible;opacity:1}
+.music-volume-panel label{display:block;font-size:12px;margin-bottom:5px}
+.music-volume-panel input{width:100%;min-height:32px;accent-color:#202522;cursor:pointer}
+@media(max-width:360px){.header-start,.header-end{gap:4px}.site-header .nav-control{min-width:36px}.site-header .logo{font-size:20px;letter-spacing:.08em;max-width:120px}}
 
 .collection-tabs{display:flex;gap:10px;overflow-x:auto;max-width:100%;margin:0 0 30px;border-bottom:1px solid var(--line);scrollbar-width:thin}
 .collection-tabs button{display:flex;align-items:center;gap:9px;flex-shrink:0;min-height:48px;padding:12px 18px;border:0;border-bottom:2px solid transparent;background:transparent;color:#666b63;font-size:14px;white-space:nowrap}

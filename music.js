@@ -2,49 +2,63 @@
   const music=document.getElementById('background-music');
   const controls=document.getElementById('music-controls');
   const toggle=document.getElementById('music-toggle');
-  const label=document.getElementById('music-label');
   const volume=document.getElementById('music-volume');
   const status=document.getElementById('music-status');
-  let enabled=false;
+  let enabled=true;
+  let retryOnInteraction=true;
   let attempt=0;
   music.volume=Number(volume.value)/100;
   controls.hidden=false;
-  document.body.classList.add('music-ready');
   function render() {
     const playing=!music.paused;
-    toggle.setAttribute('aria-pressed',String(enabled));
-    toggle.setAttribute('aria-label',enabled?'Pause background piano':'Play background piano');
-    toggle.querySelector('use').setAttribute('href',playing?'#icon-pause':'#icon-play');
-    label.textContent=playing?'Piano on':'Piano off';
+    toggle.setAttribute('aria-pressed',String(playing));
+    const label=playing?'Pause background music':'Play background music';
+    toggle.setAttribute('aria-label',label);
+    toggle.title=label;
   }
   async function play() {
     const current=++attempt;
     try {
       await music.play();
       if(!enabled||document.hidden) music.pause();
-    } catch {
+      else {retryOnInteraction=false;status.textContent='';}
+    } catch(error) {
       if(current!==attempt) return;
       enabled=false;
-      status.textContent='Piano could not start. Press play to try again.';
+      if(error.name==='NotAllowedError'&&retryOnInteraction) {
+        status.textContent='Music is ready. Select the music icon to play.';
+      } else {
+        retryOnInteraction=false;
+        status.textContent='Music could not start. Select the music icon to try again.';
+      }
     }
     render();
   }
   toggle.addEventListener('click',()=>{
+    retryOnInteraction=false;
     enabled=!enabled;
     status.textContent='';
-    if(enabled) {render();void play();}
+    if(enabled) void play();
     else {attempt++;music.pause();render();}
   });
   volume.addEventListener('input',()=>{music.volume=Number(volume.value)/100;});
   music.addEventListener('play',render);
   music.addEventListener('pause',render);
   music.addEventListener('error',()=>{
-    attempt++;enabled=false;music.pause();render();
-    status.textContent='Piano is currently unavailable. Please try again later.';
+    attempt++;enabled=false;retryOnInteraction=false;music.pause();render();
+    status.textContent='Music is currently unavailable. Please try again later.';
   });
+  function retry(event) {
+    if(!retryOnInteraction||document.hidden||event.target.closest('#music-controls'))return;
+    if(event.type==='keydown'&&!['Enter',' '].includes(event.key))return;
+    retryOnInteraction=false;enabled=true;void play();
+  }
+  document.addEventListener('pointerdown',retry);
+  document.addEventListener('keydown',retry);
   document.addEventListener('visibilitychange',()=>{
     if(document.hidden) {attempt++;music.pause();}
     else if(enabled) void play();
   });
   render();
+  if(!document.hidden) void play();
 })();
