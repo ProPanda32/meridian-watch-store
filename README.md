@@ -69,7 +69,7 @@ Names and prices remain illustrative sample data.
 
 ## Landing media
 
-The supplied `Landing Page video.mp4` is bundled at its original 1916 × 1080 resolution as `assets/watches/landing-page-video.mp4` (H.264, fast-start metadata, approximately 5.1 MB) and `assets/watches/landing-page-video.webm` (VP9, approximately 4.2 MB). The browser loads one supported format. `assets/watches/landing-page-poster.webp` is a still from the film.
+The supplied `Complete Landing Page Video.mp4` is prepared for the web as `assets/watches/landing-page-video.mp4` (H.264, 1920 × 1080, approximately 16 MB) and `assets/watches/landing-page-video.webm` (VP9, approximately 12 MB). The browser loads one supported format. `assets/watches/landing-page-poster.webp` is a still from the film.
 
 The film is silent. Playback starts muted when motion is allowed, pauses offscreen, and stays paused after a visitor pauses it. Reduced-motion visitors see the poster and can choose to play the film.
 
