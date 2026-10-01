@@ -19,7 +19,7 @@ test('invalid or unavailable checkout does not create an order or change stock',
   const state=b.store.load();state.products[0].active=false;b.store.save(state);assert.throws(()=>b.store.createOrder({customer:'Test',email:'test@example.com',items:[{productId:'noir',quantity:1}]}));
 });
 test('failed storage reports failure and does not claim checkout success',()=>{const b=browser(new Map(),true);assert.throws(()=>b.store.createOrder({customer:'Test',email:'test@example.com',items:[{productId:'noir',quantity:1}]}),/could not save/);assert.equal(b.store.load().orders.length,3);});
-test('checkout checks the latest shared stock before saving',()=>{const b=browser(),other=browser(b.storage);other.store.createOrder({customer:'Test A',email:'a@example.com',items:[{productId:'everyday',quantity:3}]});assert.throws(()=>b.store.createOrder({customer:'Test B',email:'b@example.com',items:[{productId:'everyday',quantity:1}]}),/insufficient stock/);assert.equal(b.store.load().orders.length,4);});
+test('checkout checks the latest shared stock before saving',()=>{const b=browser(),other=browser(b.storage);other.store.createOrder({customer:'Test A',email:'a@example.com',items:[{productId:'emerald-gold',quantity:10}]});assert.throws(()=>b.store.createOrder({customer:'Test B',email:'b@example.com',items:[{productId:'emerald-gold',quantity:1}]}),/insufficient stock/);assert.equal(b.store.load().orders.length,4);});
 test('stock imagery migrates without losing browser orders or admin edits',()=>{
   const b=browser(),state=b.store.load();
   state.products[0].image='https://images.unsplash.com/photo-1630512731371-a3747ab932ed?auto=format&fit=crop&w=1000&q=85';
@@ -46,17 +46,17 @@ test('catalogue copy updates old defaults while preserving custom text and order
 
 test('five-watch collection migrates once while preserving catalogue edits and order snapshots',()=>{
   const b=browser(),old=b.store.load();
-  old.products=old.products.slice(0,3);delete old.fiveWatchCollectionAdded;
+  old.products=old.products.slice(0,2);delete old.fiveWatchCollectionAdded;
   old.products[0].name='Owner custom name';old.products[0].price=250;old.products[0].stock=4;
   const orders=JSON.stringify(old.orders);
   b.storage.set(b.store.key,JSON.stringify(old));
-  const updated=b.store.load();assert.equal(updated.products.length,8);
+  const updated=b.store.load();assert.equal(updated.products.length,7);
   assert.equal(updated.products[0].name,'Owner custom name');assert.equal(updated.products[0].price,250);assert.equal(updated.products[0].stock,4);
   assert.equal(JSON.stringify(updated.orders),orders);
   updated.products.find(p=>p.id==='emerald-gold').price=300;
   updated.products=updated.products.filter(p=>p.id!=='blue-steel');
   b.store.save(updated);
-  const saved=b.store.load();assert.equal(saved.products.length,7);
+  const saved=b.store.load();assert.equal(saved.products.length,6);
   assert.equal(saved.products.find(p=>p.id==='emerald-gold').price,300);
   assert.equal(saved.products.some(p=>p.id==='blue-steel'),false);
 });
@@ -70,4 +70,15 @@ test('all five new watches can be ordered with distinct image paths and stock sn
     assert.equal(b.store.load().products.find(p=>p.id===product.id).stock,product.stock-1);
     assert.equal(order.items.find(i=>i.productId===product.id).unitPrice,product.price);
   }
+});
+
+
+test('removed Aster disappears from saved catalogues while historical orders remain intact',()=>{
+  const b=browser(),state=b.store.load();
+  state.products.push({...state.products[0],id:'everyday',name:'The Aster',image:'assets/watches/champagne-skeleton.webp'});
+  state.orders[0].items[0]={productId:'everyday',name:'The Aster',quantity:1,unitPrice:195};
+  const orders=JSON.stringify(state.orders);b.storage.set(b.store.key,JSON.stringify(state));
+  const updated=b.store.load();assert.equal(updated.products.some(p=>p.id==='everyday'),false);
+  assert.equal(JSON.stringify(updated.orders),orders);
+  assert.throws(()=>b.store.createOrder({customer:'Demo',email:'demo@example.com',items:[{productId:'everyday',quantity:1}]}),/unavailable/);
 });

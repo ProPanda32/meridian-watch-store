@@ -61,3 +61,8 @@ test('five individual product images are available to storefront and admin',asyn
     assert.deepEqual(Buffer.from(await response.arrayBuffer()),readFileSync(new URL(`../assets/watches/${name}.webp`,import.meta.url)));
   }
 });
+
+
+test('removed skeleton product image is no longer served',async()=>{
+  assert.equal((await fetch(base+'/assets/watches/champagne-skeleton.webp')).status,404);
+});

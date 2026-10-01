@@ -9,17 +9,16 @@
     products: [
       {id:'noir',name:'The Aurelia',style:'Champagne gold · Celestial dial',price:185,stock:12,active:true,image:'assets/watches/champagne-moonphase.webp',description:'A star-speckled midnight-blue dial with a crescent-moon detail, framed by an engraved champagne-gold bezel. The matching bracelet carries delicate celestial motifs for a warm, quietly distinctive finish.',badge:'The signature edit'},
       {id:'silver',name:'The Selene',style:'White bracelet · Midnight-blue dial',price:165,stock:8,active:true,image:'assets/watches/midnight-moonphase.webp',description:'A midnight-blue starry dial brings depth to a bright white bracelet with gold-tone accents. Slender markers and a moon-inspired detail complete a crisp, balanced celestial design.',badge:'Everyday classic'},
-      {id:'everyday',name:'The Aster',style:'Champagne gold · Skeleton dial',price:195,stock:3,active:true,image:'assets/watches/champagne-skeleton.webp',description:'An intricate skeleton-style dial places layered gears, silver-tone bridges and blue accents in view. An engraved champagne-gold bezel adds warmth and celestial detail to this expressive design.',badge:'A considered choice'},
       ...newWatchCollection
     ],
     orders: [
       {id:'DEMO-1003',date:'2026-10-01',customer:'Sample customer A',email:'customer-a@example.com',status:'Processing',items:[{productId:'noir',name:'The Aurelia',quantity:1,unitPrice:185}],notes:''},
       {id:'DEMO-1002',date:'2026-09-30',customer:'Sample customer B',email:'customer-b@example.com',status:'Shipped',items:[{productId:'silver',name:'The Selene',quantity:2,unitPrice:165}],notes:'Example: tracking details would be recorded here.'},
-      {id:'DEMO-1001',date:'2026-09-29',customer:'Sample customer C',email:'customer-c@example.com',status:'Delivered',items:[{productId:'everyday',name:'The Aster',quantity:1,unitPrice:195}],notes:''}
+      {id:'DEMO-1001',date:'2026-09-29',customer:'Sample customer C',email:'customer-c@example.com',status:'Delivered',items:[{productId:'noir',name:'The Aurelia',quantity:1,unitPrice:185}],notes:''}
     ]
   };
-  const legacyProducts = [{"id": "noir", "image": "https://images.unsplash.com/photo-1630512731371-a3747ab932ed?auto=format&fit=crop&w=1000&q=85", "style": "Black leather · Gold tone", "description": "A dark dial, warm gold tones and a classic leather strap. A refined companion for evenings and everyday wear."}, {"id": "silver", "image": "https://images.unsplash.com/photo-1630512731154-ed3afce20505?auto=format&fit=crop&w=1000&q=85", "style": "Black leather · Silver tone", "description": "A crisp silver-tone case and a pared-back black dial. Understated style with a versatile monochrome palette."}, {"id": "everyday", "image": "https://images.unsplash.com/photo-1660287049716-036751adfa1b?auto=format&fit=crop&w=1000&q=85", "style": "Minimal dial · Leather strap", "description": "Clean lines and an easy-wearing profile. A simple expression of everyday style, from your morning coffee to your last meeting."}];
-  const previousCatalogue = [{"id": "noir", "name": "The Noir", "description": "An engraved champagne-gold bracelet and a starry midnight dial with a moonphase-inspired detail. A celestial expression of understated luxury."}, {"id": "silver", "name": "The Silver", "description": "A white and gold-tone bracelet frames a midnight-blue celestial dial. A crisp, considered palette with a moonphase-inspired detail."}, {"id": "everyday", "name": "The Everyday", "description": "An open-work dial reveals intricate gold and silver-tone details, framed by an engraved champagne-gold bezel. A distinctive expression of mechanical design."}];
+  const legacyProducts = [{"id": "noir", "image": "https://images.unsplash.com/photo-1630512731371-a3747ab932ed?auto=format&fit=crop&w=1000&q=85", "style": "Black leather \u00b7 Gold tone", "description": "A dark dial, warm gold tones and a classic leather strap. A refined companion for evenings and everyday wear."}, {"id": "silver", "image": "https://images.unsplash.com/photo-1630512731154-ed3afce20505?auto=format&fit=crop&w=1000&q=85", "style": "Black leather \u00b7 Silver tone", "description": "A crisp silver-tone case and a pared-back black dial. Understated style with a versatile monochrome palette."}];
+  const previousCatalogue = [{"id": "noir", "name": "The Noir", "description": "An engraved champagne-gold bracelet and a starry midnight dial with a moonphase-inspired detail. A celestial expression of understated luxury."}, {"id": "silver", "name": "The Silver", "description": "A white and gold-tone bracelet frames a midnight-blue celestial dial. A crisp, considered palette with a moonphase-inspired detail."}];
   const copy = v => JSON.parse(JSON.stringify(v));
   const statuses = ['Processing','Shipped','Delivered','Cancelled'];
   function validate(s) {
@@ -45,6 +44,7 @@
   function load() {
     try { const raw=localStorage.getItem(key); if (!raw) return copy(defaults);
       const state=validate(JSON.parse(raw));
+      state.products=state.products.filter(product=>product.id!=='everyday');
       for (const legacy of legacyProducts) {
         const product=state.products.find(p=>p.id===legacy.id);
         const replacement=defaults.products.find(p=>p.id===legacy.id);

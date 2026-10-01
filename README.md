@@ -47,7 +47,7 @@ The live workspace, login API, database and real-order backend have been removed
 
 Run `node --test test/demo.test.mjs` for the data and checkout tests. These cover storefront-to-admin order persistence, order price snapshots, stock updates, invalid/unavailable items, duplicate items, latest-stock checks, failed-storage handling, imagery migration and catalogue copy migration. All six tests passed during recovery validation.
 
-`npm test` runs all 11 checkout and server tests, including landing assets, HTTP metadata, full video downloads, byte-range requests and the WebM alternative. All 11 tests passed after media integration.
+`npm test` runs all 16 checkout and server tests, including landing assets, HTTP metadata, full video downloads, byte-range requests and the WebM alternative. All 16 tests pass, including removed-product migration and image-route removal.
 
 ## Files
 
@@ -61,9 +61,9 @@ Run `node --test test/demo.test.mjs` for the data and checkout tests. These cove
 
 ## Watch imagery
 
-Original AI-generated images from the **Create Watch Image** chat, bundled as optimized WebP files in `assets/watches/`. The latest refined champagne-gold moonphase and skeleton images are paired with the white and gold midnight-blue watch.
+Original AI-generated images from the **Create Watch Image** chat, bundled as optimized WebP files in `assets/watches/`. The champagne-gold moonphase and white-and-gold midnight-blue images remain in the collection.
 
-The sample collection is **The Aurelia**, **The Selene** and **The Aster**. Existing browser data automatically replaces the original stock images and unedited catalogue names, styles and descriptions while preserving custom edits, prices, stock, visibility and existing order snapshots. Admin accepts HTTPS image URLs or bundled `assets/watches/*.webp` paths.
+The sample collection is **The Aurelia** and **The Selene**. Existing browser data automatically replaces the original stock images and unedited catalogue names, styles and descriptions while preserving custom edits, prices, stock, visibility and existing order snapshots. Admin accepts HTTPS image URLs or bundled `assets/watches/*.webp` paths.
 
 Names and prices remain illustrative sample data.
 
@@ -83,6 +83,6 @@ Navigation and playback icons use Lucide geometry; its license is included in `a
 
 ## Five-watch collection
 
-The uploaded collage is preserved as `sources/merlock-five-watch-collection.png`. Its five panels are cropped without the dividing lines into optimized WebP files in `assets/watches/`. The Verdant, Mariner, Obsidian, Argent and Voyager join the three existing watches in the storefront, search, checkout and admin catalogue. Names, prices and initial stock levels are illustrative and editable in admin; descriptions refer to the visible designs rather than verified specifications.
+The uploaded collage is preserved as `sources/merlock-five-watch-collection.png`. Its five panels are cropped without the dividing lines into optimized WebP files in `assets/watches/`. The Verdant, Mariner, Obsidian, Argent and Voyager join the two existing watches in the storefront, search, checkout and admin catalogue. Names, prices and initial stock levels are illustrative and editable in admin; descriptions refer to the visible designs rather than verified specifications.
 
-Returning browsers receive the five new listings once without changing existing products, custom edits or order snapshots. Once saved, the migration marker also preserves later edits and deletions to the new products. Product cards show the entire image without cropping the watch.
+Returning browsers receive the five new listings once without changing existing products, custom edits or order snapshots. Once saved, the migration marker also preserves later edits and deletions to the new products. Product cards use centered square framing, trimming excess landscape background while preserving the watches. The tall Selene photo fits within the square to preserve its bracelet. The Aster listing and its skeleton image have been removed; historical order snapshots remain intact.
