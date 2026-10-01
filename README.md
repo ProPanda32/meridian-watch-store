@@ -116,3 +116,5 @@ Tabs support click, arrow keys, Home and End, with one keyboard tab stop and a l
 An active watch with zero stock remains in its collection with a Sold out badge and disabled add button. Product details reflect stock changes while open. Returning stock restores the original badge and add button. Bag updates remove watches that become unavailable, and both add-to-bag and checkout validate the latest stock.
 
 Switching watch tabs uses a short fade-out followed by a gentle fade-and-slide in, with animated panel height between All watches and smaller groups. Rapid selections cancel earlier transitions. Reduced-motion visitors switch immediately.
+
+Add buttons show each watch’s current in-bag quantity and update after adding, changing quantity or removing an item. The shopping bag includes square watch thumbnails beside each item.
