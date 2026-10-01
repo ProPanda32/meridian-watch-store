@@ -46,6 +46,19 @@
     window.dispatchEvent(new Event('meridian-store-change'));
     return copy(state);
   }
+  function createOrder({customer,email,items,paymentStatus='Unpaid',source='Admin'}) {
+    if(typeof customer!=='string'||!customer.trim()||customer.trim().length>150||typeof email!=='string'||email.length>254||!/^\S+@\S+\.\S+$/.test(email)||!Array.isArray(items)||!items.length||items.length>100||!['Unpaid','Paid','Demo — no payment'].includes(paymentStatus)||!['Admin','Storefront'].includes(source))throw Error('Enter a name, valid email and order items.');
+    const next=load(),seen=new Set();
+    const snapshots=items.map(i=>{
+      const p=next.products.find(p=>p.id===i.productId);
+      if(!p||!p.active||seen.has(p.id)||!Number.isSafeInteger(i.quantity)||i.quantity<1||i.quantity>p.stock)throw Error('An item is unavailable or has insufficient stock. Please review your bag.');
+      seen.add(p.id);p.stock-=i.quantity;
+      return {productId:p.id,name:p.name,quantity:i.quantity,unitPrice:p.price};
+    });
+    const id='DEMO-'+crypto.randomUUID();
+    const order={id,date:new Date().toISOString().slice(0,10),customer:customer.trim(),email:email.trim(),status:'Processing',paymentStatus,source,notes:'',items:snapshots};
+    next.orders.unshift(order);save(next);return copy(order);
+  }
   const escape = s => String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  window.MeridianStore={key,load,save,validate,escape,statuses,money:n=>new Intl.NumberFormat('en-GB',{style:'currency',currency:'GBP'}).format(n),orderTotal:o=>o.items.reduce((sum,i)=>sum+i.quantity*i.unitPrice,0)};
+  window.MeridianStore={key,load,save,createOrder,validate,escape,statuses,money:n=>new Intl.NumberFormat('en-GB',{style:'currency',currency:'GBP'}).format(n),orderTotal:o=>o.items.reduce((sum,i)=>sum+i.quantity*i.unitPrice,0)};
 })();

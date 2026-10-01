@@ -1,1 +1,13 @@
-{"name":"project-watch-store","private":true,"version":"1.1.0","type":"commonjs","engines":{"node":">=24.14.0"},"scripts":{"start":"node server.mjs","test":"node --test test/server.test.mjs"}}
+{
+  "name": "merlock-watch-store",
+  "private": true,
+  "version": "1.2.0",
+  "type": "commonjs",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node server.mjs",
+    "test": "node --test test/demo.test.mjs"
+  }
+}

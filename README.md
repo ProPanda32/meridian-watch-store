@@ -1,77 +1,56 @@
-# Merlock Watch Store
+# Merlock Watch Store — Demo
 
-Luxury watch storefront with separate demo and protected live owner workspaces.
+A luxury watch storefront and owner dashboard, built for demonstrations.
 
-## Features
+## Try it
 
-- Product price, stock, visibility, image and description editing; add products.
-- Order search, fulfilment status, payment records and internal notes.
-- Demo workspace with three sample orders stored only in this browser.
-- Live workspace with owner sign-in and manually entered real orders.
-- Orders reduce inventory and retain original product names and prices.
-- Store name and announcement editing.
-- SQLite persistence, server validation, revision conflict protection, HTTP-only sessions, CSRF protection and sign-in rate limiting.
+Run `npm start` with Node.js 20 or later, then open http://localhost:3000. No dependencies or owner password setup are required.
 
-## Demo preview
+You can also host the files on a static website service. Serve both pages at the same origin. Opening separate file: URLs is not recommended because browser storage sharing varies.
 
-Open admin.html for demo mode. Serve files over HTTP for reliable shared local storage. On a running server, the demo's View storefront link opens index.html?demo=1; the normal storefront loads the shared live catalogue. Demo orders and live orders remain separate.
+1. Add watches to the bag.
+2. Choose **Demo checkout**, use fictional details, and select **Place demo order**.
+3. Use **Admin sign-in** in the storefront footer, or the confirmation's dashboard link.
+4. Sign in using username **owner** and password **MerlockDemo123!**.
+5. Open **Orders**. Your storefront order appears alongside sample orders.
 
-## Run locally
+## Demo admin login
 
-Use Node.js 24.14 or later. No npm dependencies or installation are needed.
+The login flow is intentionally browser-based with public demo credentials. It is not secure access control and must not be used for real customer information or a live store. Sign-in is retained for the current tab using session storage; **Sign out** clears it.
 
-Set ADMIN_PASSWORD to a unique password of at least 14 characters, then run npm start. Store the password as an environment variable; never commit it.
+## Included
 
-PowerShell:
+- Storefront product details, bag quantities, stock limits and demo checkout.
+- Orders shared between the storefront and admin dashboard in the same browser.
+- Automatic updates across open tabs, plus refresh when a page regains focus.
+- Confirmation showing the order reference and total.
+- Admin order search, status filtering, fulfilment status, payment records and notes.
+- Product price, stock, name, image, description and visibility editing; add products.
+- Store name and announcement settings.
+- Three initial sample orders.
+- Original order price snapshots, independent of later product price changes.
 
-```powershell
-$env:ADMIN_PASSWORD = Read-Host 'Enter a unique owner password (14+ characters)' -MaskInput
-npm start
-```
+Checkout validates the latest stock and reduces inventory only after a successful save. Failed saves do not clear the bag or show a success confirmation. No payments are taken, no emails are sent, and no real orders are transmitted to a server.
 
-Open http://localhost:3000/admin.html, select Live workspace and sign in. The live workspace starts with the sample watch catalogue and ZERO orders. Replace sample products with accurate details before adding genuine orders.
+Cancelled orders do not automatically restock; adjust demo stock in Products when needed. Payment statuses are illustrative records only.
 
-Use Orders → Add order to enter a customer name, email, product, quantity and payment record. The form records payments received elsewhere; it does not charge customers. Customer checkout and automatic order submission are not implemented.
+## Storage
 
-Cancelled orders do not automatically restock or issue refunds. Adjust stock manually when appropriate. Existing order prices cannot be rewritten through product price edits.
+Data lives in browser local storage under `meridian-preview-v1` (retained for compatibility with earlier demo versions). Pages must be on the same origin, in the same browser profile, to share orders. Data persists on refresh, but is not shared between devices or visitors and is lost when this site's browser data is cleared.
 
-## Host the live store
+The live workspace, login API, database and real-order backend have been removed for now. The optional Node server serves static files only. GitHub Pages or any static host can run the full demo.
 
-GitHub Pages and other static hosting run the demo only. The live workspace needs a Node server with HTTPS and a persistent writable disk.
+## Checks
 
-| Environment variable | Value |
-| --- | --- |
-| ADMIN_PASSWORD | Strong unique password stored as a host secret |
-| NODE_ENV | production |
-| APP_ORIGIN | Exact HTTPS origin, e.g. https://your-store.example (no trailing slash) |
-| HOST | 0.0.0.0 when required by the hosting provider |
-| PORT | Host-assigned port, or 3000 |
-| DATABASE_PATH | File on a persistent disk, e.g. /data/store.sqlite |
-
-Start command: npm start. Run one server instance with its persistent database. Default bind address is 127.0.0.1. Terminate HTTPS at the host or reverse proxy. Production cookies use Secure; production requires an HTTPS APP_ORIGIN. Mutation requests from other origins are rejected.
-
-Back up using SQLite-aware backup tools or stop the server before copying its database and journal files. Never commit customer records or databases. Sessions expire after eight hours and are invalidated on server restart.
-
-This version uses one shared owner password. Separate staff accounts, password recovery, MFA and an audit trail are not included.
-
-The dashboard starts in demo mode. Select Live workspace to resume an owner session. If a save conflicts with another tab, select Live workspace again to reload the current server data before retrying.
-
-## Validation
-
-Run npm test. Checks cover owner authentication, origin/CSRF enforcement, private order data, stock limits, immutable price snapshots, stale-write rejection, logout and restricted public files.
-
-Browser checks covered owner sign-in, saving the Merlock name and creating an order in a separate local test database. No test customer records or credentials are included in the repository.
+Run `npm test`. Tests cover storefront-to-admin order persistence, order price snapshots, stock updates, invalid/unavailable items, duplicate items, latest-stock checks and failed-storage handling.
 
 ## Files
 
-- index.html: storefront
-- admin.html, admin.css, admin.js: owner dashboard
-- store.js: browser-local demo model
-- catalogue.json: live catalogue seed
-- server.mjs: protected API and HTTP server
-- test/server.test.mjs: backend tests
-
-catalogue.json seeds new databases only. Change an existing store name using the live dashboard's Settings.
+- `index.html`, `storefront.js`: storefront and demo checkout
+- `admin.html`, `admin.css`, `admin.js`: dashboard and demo login
+- `store.js`: shared browser-local data and order creation
+- `server.mjs`: optional static preview server
+- `test/demo.test.mjs`: shared checkout model tests
 
 ## Photography
 
@@ -82,4 +61,4 @@ Illustrative images by Laura Chouette and Swapnil B via Unsplash:
 - https://unsplash.com/photos/black-and-silver-analog-watch-8xg3pB9V-O4
 - https://unsplash.com/photos/a-watch-on-a-wrist-7rj4hxIwdBs
 
-Sample product names and prices do not identify the brands pictured. Replace images with accurate product photography before launching sales.
+Names and prices are sample data and do not identify the brands pictured.
