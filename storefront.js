@@ -73,7 +73,7 @@ function render(){state=store.load();document.title=state.settings.name+' | Time
   renderBag();
 }
 function bagStepper(product){
-  const quantity=bag.get(product.id)||0;
+  const quantity=product.stock>0?(bag.get(product.id)||0):0;
   return `<div class="bag-controls" data-bag-controls="${product.id}"><button class="bag-add-button" data-add="${product.id}" ${quantity?'hidden':''} ${product.stock?'':'disabled'}>${product.stock?'Add to bag':'Sold out'}</button><div class="bag-stepper" ${quantity?'':'hidden'} role="group" aria-label="${esc(product.name)} bag quantity"><button data-decrease="${product.id}" aria-label="Remove one ${esc(product.name)} from bag" ${quantity?'':'disabled'}>−</button><span data-bag-quantity="${product.id}" aria-label="${quantity} in bag">${quantity}</span><button data-add="${product.id}" aria-label="Add one ${esc(product.name)} to bag" ${quantity>=product.stock?'disabled':''}>+</button></div></div>`;
 }
 function removeOneFromBag(id){
@@ -85,13 +85,16 @@ function removeOneFromBag(id){
 function syncBagIndicators(){
   for(const controls of document.querySelectorAll('[data-bag-controls]')){
     const product=state.products.find(p=>p.id===controls.dataset.bagControls);
-    const quantity=bag.get(controls.dataset.bagControls)||0;
+    const soldOut=!product||product.stock<=0;
+    const quantity=soldOut?0:(bag.get(controls.dataset.bagControls)||0);
     const add=controls.querySelector('.bag-add-button');
     const stepper=controls.querySelector('.bag-stepper');
     const focused=controls.contains(document.activeElement);
     const changed=add.hidden!==Boolean(quantity);
     add.hidden=Boolean(quantity);stepper.hidden=!quantity;
-    add.textContent=product?.stock?'Add to bag':'Sold out';
+    add.textContent=soldOut?'Sold out':'Add to bag';
+    add.classList.toggle('is-sold-out',soldOut);
+    add.disabled=soldOut||!product.active;
     if(changed&&focused)(quantity?stepper.querySelector('[data-add]'):add).focus();
   }
   for(const button of document.querySelectorAll('[data-decrease]'))button.disabled=!bag.get(button.dataset.decrease);
@@ -154,6 +157,8 @@ function renderCheckout(){const items=bagItems();$('checkout-summary').innerHTML
 function startCheckout(){render();if(!bag.size)return;$('bag-dialog').close();$('checkout-error').textContent='';renderCheckout();$('checkout-dialog').showModal();}
 document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.details)showDetails(b.dataset.details);if(b.dataset.add)addToBag(b.dataset.add);if(b.dataset.decrease)removeOneFromBag(b.dataset.decrease);if(b.dataset.remove){bag.delete(b.dataset.remove);renderBag();}if(b.dataset.quantity){state=store.load();const p=state.products.find(p=>p.id===b.dataset.quantity);if(!p)return;const q=(bag.get(p.id)||0)+Number(b.dataset.delta);if(q<=0)bag.delete(p.id);else bag.set(p.id,Math.min(q,p.stock));renderBag();}});
 $('checkout-form').addEventListener('submit',e=>{e.preventDefault();const f=e.currentTarget;if(!f.reportValidity())return;$('place-order').disabled=true;try{const order=store.createOrder({customer:f.elements.customer.value,email:f.elements.email.value,paymentStatus:'Demo — no payment',source:'Storefront',items:[...bag].map(([productId,quantity])=>({productId,quantity}))});bag.clear();render();$('checkout-dialog').close();$('confirmation-text').textContent=order.id+' · '+money(store.orderTotal(order))+' — saved to the admin Orders page.';$('confirmation-dialog').showModal();}catch(err){$('checkout-error').textContent=err.message;$('place-order').disabled=!bag.size;}});
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)render();});
+window.addEventListener('pageshow',render);
 window.addEventListener('storage',e=>{if(e.key===store.key)render();});window.addEventListener('focus',render);window.addEventListener('meridian-store-change',render);
 for(const d of document.querySelectorAll('dialog'))d.addEventListener('click',e=>{if(e.target===d){const r=d.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)d.close();}});
 if(document.modelContext?.registerTool){try{Promise.resolve(document.modelContext.registerTool({name:'add_watch_to_bag',description:'Add one demo watch to the visible bag. Does not place an order.',inputSchema:{type:'object',properties:{productId:{type:'string'}},required:['productId'],additionalProperties:false},annotations:{readOnlyHint:false,untrustedContentHint:false},execute:input=>{if(!input||typeof input.productId!=='string'||Object.keys(input).some(k=>k!=='productId'))throw Error('A valid productId is required');return addToBag(input.productId);}})).catch(()=>{});}catch{}}

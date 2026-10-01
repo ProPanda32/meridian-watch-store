@@ -183,3 +183,5 @@ dialog::backdrop{background:#0008}
 .bag-controls{display:flex;flex:1;min-width:0}
 .bag-add-button,.product-actions .bag-add-button{width:100%;min-height:44px;padding:12px 18px;border:1px solid var(--ink);background:var(--ink);color:var(--paper);font-size:13px}
 #detail-bag-controls .bag-controls{margin-top:16px;width:max-content}
+
+.bag-add-button.is-sold-out:disabled,.product-actions .bag-add-button.is-sold-out:disabled{background:#e7e7e0;border-color:#bfc2bb;color:var(--ink);opacity:1;cursor:not-allowed}
