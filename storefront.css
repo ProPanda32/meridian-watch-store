@@ -163,3 +163,5 @@ dialog::backdrop{background:#0008}
 .collection-tabs button:focus-visible{outline-offset:-4px}
 .collection-tabs span{font-size:11px;line-height:1.5;min-width:20px;text-align:center;background:#e7e7e0;border-radius:12px;padding:1px 5px;font-weight:400}
 @media(max-width:600px){.collection-tabs{gap:2px;margin-bottom:24px}.collection-tabs button{padding:12px}}
+
+.sold-out-badge{background:#202522;color:var(--paper)}

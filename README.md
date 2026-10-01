@@ -110,3 +110,7 @@ Returning browsers receive this collection once while retaining existing catalog
 All watches is selected on page load and shows the full active catalogue. Four themes contain three watches each: Celestial (Aurelia, Selene, Luna), Dress (Estelle, Elara, Argent), Sport (Mariner, Sylvan, Voyager), and Statement (Verdant, Obsidian, Eclipse). Any extra products added in admin appear in All watches. Tab counts reflect active products; existing search still covers the whole catalogue.
 
 Tabs support click, arrow keys, Home and End, with one keyboard tab stop and a labelled product panel. Switching collections preserves the bag and the current collection survives stock updates and checkout. On mobile the tab strip scrolls horizontally.
+
+## Sold-out watches
+
+An active watch with zero stock remains in its collection with a Sold out badge and disabled add button. Product details reflect stock changes while open. Returning stock restores the original badge and add button. Bag updates remove watches that become unavailable, and both add-to-bag and checkout validate the latest stock.
