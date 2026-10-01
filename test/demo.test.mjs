@@ -82,3 +82,30 @@ test('removed Aster disappears from saved catalogues while historical orders rem
   assert.equal(JSON.stringify(updated.orders),orders);
   assert.throws(()=>b.store.createOrder({customer:'Demo',email:'demo@example.com',items:[{productId:'everyday',quantity:1}]}),/unavailable/);
 });
+
+test('dress and sport collection updates returning browsers without duplicating or replacing edited products',()=>{
+  const b=browser(),old=b.store.load(),ids=['gold-rectangle','navy-moonphase','green-chronograph','pearl-two-tone','black-skeleton'];
+  old.products=old.products.filter(p=>!ids.includes(p.id));delete old.dressAndSportCollectionAdded;
+  old.products[0].name='Owner name';old.products[0].stock=4;old.products[0].price=250;
+  const orders=JSON.stringify(old.orders);
+  b.storage.set(b.store.key,JSON.stringify(old));
+  const updated=b.store.load();assert.equal(updated.products.length,12);
+  assert.equal(updated.products[0].name,'Owner name');assert.equal(updated.products[0].stock,4);assert.equal(updated.products[0].price,250);
+  assert.equal(JSON.stringify(updated.orders),orders);
+  updated.products.find(p=>p.id==='gold-rectangle').price=300;
+  updated.products=updated.products.filter(p=>p.id!=='navy-moonphase');b.store.save(updated);
+  const saved=b.store.load();assert.equal(saved.products.length,11);
+  assert.equal(saved.products.find(p=>p.id==='gold-rectangle').price,300);
+  assert.equal(saved.products.some(p=>p.id==='navy-moonphase'),false);
+});
+test('all five dress and sport watches can be checked out with individual stock and price snapshots',()=>{
+  const b=browser(),ids=['gold-rectangle','navy-moonphase','green-chronograph','pearl-two-tone','black-skeleton'];
+  const products=ids.map(id=>b.store.load().products.find(p=>p.id===id));
+  assert.equal(new Set(products.map(p=>p.image)).size,5);
+  const order=b.store.createOrder({customer:'Demo',email:'demo@example.com',items:ids.map(productId=>({productId,quantity:1}))});
+  assert.equal(order.items.length,5);assert.equal(b.store.orderTotal(order),995);
+  for(const product of products){
+    assert.equal(b.store.load().products.find(p=>p.id===product.id).stock,product.stock-1);
+    assert.equal(order.items.find(item=>item.productId===product.id).unitPrice,product.price);
+  }
+});

@@ -77,3 +77,11 @@ test('background piano supports audio metadata and byte-range downloads',async()
   assert.equal(response.status,206);assert.deepEqual(Buffer.from(await response.arrayBuffer()),audio.subarray(0,1024));
   assert.equal((await fetch(base+'/music.js')).status,200);
 });
+
+test('dress and sport product photos serve the exact bundled images',async()=>{
+  for(const name of ['gold-rectangle','navy-moonphase','green-chronograph','pearl-two-tone','black-skeleton']){
+    const response=await fetch(base+`/assets/watches/${name}.webp`);
+    assert.equal(response.status,200);assert.equal(response.headers.get('content-type'),'image/webp');
+    assert.deepEqual(Buffer.from(await response.arrayBuffer()),readFileSync(new URL(`../assets/watches/${name}.webp`,import.meta.url)));
+  }
+});

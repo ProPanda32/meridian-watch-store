@@ -47,7 +47,7 @@ The live workspace, login API, database and real-order backend have been removed
 
 Run `node --test test/demo.test.mjs` for the data and checkout tests. These cover storefront-to-admin order persistence, order price snapshots, stock updates, invalid/unavailable items, duplicate items, latest-stock checks, failed-storage handling, imagery migration and catalogue copy migration. All six tests passed during recovery validation.
 
-`npm test` runs all 20 checkout, music-control and server tests, including landing assets, HTTP metadata, full video downloads, byte-range requests and the WebM alternative. All 20 tests pass, including removed-product migration and image-route removal.
+`npm test` runs all 23 checkout, music-control and server tests, including landing assets, HTTP metadata, full video downloads, byte-range requests and the WebM alternative. All 23 tests pass, including removed-product migration and image-route removal.
 
 ## Files
 
@@ -98,3 +98,9 @@ The piano recording is normalized to -26 LUFS, starts at 20% volume and fades ge
 ## Header and wordmark
 
 The fixed header overlays the full-height hero with white navigation on a transparent background at the top. After scrolling it transitions to the storefront’s chalk-white background and dark navigation. The scroll-linked film animation starts at zero progress with the header overlay. The MERLOCK wordmark uses locally hosted Bodoni Moda, licensed under the SIL Open Font License (`assets/fonts/OFL.txt`).
+
+## Dress and sport collection
+
+The second uploaded collage is renamed `sources/merlock-dress-and-sport-collection.png`. Its five watches are individually cropped into square WebP images, omitting divider lines and keeping each full watch visible. The Estelle, Luna, Sylvan, Elara and Eclipse bring the default catalogue to 12 products. Their prices and initial stock levels are sample values editable in admin.
+
+Returning browsers receive this collection once while retaining existing catalogue edits, stock levels and order snapshots. Later changes or deletions to the new listings are preserved once saved. All five listings work with storefront details, search, checkout and admin editing.
