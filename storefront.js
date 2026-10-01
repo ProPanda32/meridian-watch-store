@@ -64,14 +64,21 @@ function render(){state=store.load();document.title=state.settings.name+' | Time
   const visibleProducts=collectionProducts(selectedCollection);
   $('products').setAttribute('aria-labelledby','collection-tab-'+selectedCollection);
   $('collection-status').textContent=`Showing ${visibleProducts.length} ${visibleProducts.length===1?'watch':'watches'}.`;
-  $('products').innerHTML=visibleProducts.map(p=>`<article><div class="product-image"><img src="${esc(p.image)}" alt="${esc(p.style)} watch" loading="lazy"><span class="badge${p.stock===0?' sold-out-badge':''}">${p.stock===0?'Sold out':esc(p.badge)}</span></div><div class="product-info"><div><h3>${esc(p.name)}</h3><p>${esc(p.style)}</p></div><span class="price">${money(p.price)}</span></div><div class="product-actions"><button data-details="${p.id}">View details</button><button data-add="${p.id}" ${p.stock===0?'disabled':''}>${addButtonContent(p)}</button></div></article>`).join('')||'<p>No watches are currently available in this collection.</p>';renderBag();
+  $('products').innerHTML=visibleProducts.map(p=>`<article><div class="product-image"><img src="${esc(p.image)}" alt="${esc(p.style)} watch" loading="lazy"><span class="badge${p.stock===0?' sold-out-badge':''}">${p.stock===0?'Sold out':esc(p.badge)}</span></div><div class="product-info"><div><h3>${esc(p.name)}</h3><p>${esc(p.style)}</p></div><span class="price">${money(p.price)}</span></div><div class="product-actions"><button data-details="${p.id}">View details</button><button data-add="${p.id}" ${p.stock===0?'disabled':''}>${addButtonContent(p)}</button></div><button class="remove-from-bag" data-decrease="${p.id}" aria-label="Remove one ${esc(p.name)} from bag" ${bag.get(p.id)?'':'hidden'}>− Remove one from bag</button></article>`).join('')||'<p>No watches are currently available in this collection.</p>';renderBag();
 }
 function addButtonContent(product){
   if(product.stock===0)return 'Sold out';
   const quantity=bag.get(product.id)||0;
   return 'Add to bag'+(quantity?` <span class="bag-quantity">${quantity} in bag</span>`:'');
 }
+function removeOneFromBag(id){
+  const quantity=bag.get(id)||0;
+  if(!quantity)return;
+  if(quantity===1)bag.delete(id);else bag.set(id,quantity-1);
+  renderBag();toast('Removed one from your bag');
+}
 function syncBagIndicators(){
+  for(const button of document.querySelectorAll('[data-decrease]'))button.hidden=!bag.get(button.dataset.decrease);
   for(const button of document.querySelectorAll('[data-add]')){
     const product=state.products.find(p=>p.id===button.dataset.add);
     if(!product)continue;
@@ -88,12 +95,15 @@ function syncDetailsStock(){
   const product=state.products.find(p=>p.id===detailProductId&&p.active);
   $('detail-add').disabled=!product||product.stock===0;
   $('detail-add').innerHTML=!product?'Unavailable':addButtonContent(product);
+  $('detail-remove').dataset.decrease=detailProductId;
+  $('detail-remove').hidden=!bag.get(detailProductId);
+  $('detail-remove').setAttribute('aria-label',`Remove one ${product?.name||'watch'} from bag`);
 }
 function showDetails(id){state=store.load();const p=state.products.find(p=>p.id===id&&p.active);if(!p)return;const img=$('detail-img');img.src=p.image;img.alt=p.style+' watch';$('detail-title').textContent=p.name;$('detail-copy').textContent=p.description+' '+money(p.price);detailProductId=id;syncDetailsStock();$('detail-add').onclick=()=>{const result=addToBag(id);if(!result.error)$('details-dialog').close();else syncDetailsStock();};$('details-dialog').showModal();}
 function openBag(){render();$('bag-dialog').showModal();}
 function renderCheckout(){const items=bagItems();$('checkout-summary').innerHTML=items.map(({product:p,quantity:q})=>`<p>${esc(p.name)} × ${q} — ${money(p.price*q)}</p>`).join('')+`<div class="total"><strong>Total</strong><strong>${money(items.reduce((s,i)=>s+i.quantity*i.product.price,0))}</strong></div>`;$('place-order').disabled=!bag.size;}
 function startCheckout(){render();if(!bag.size)return;$('bag-dialog').close();$('checkout-error').textContent='';renderCheckout();$('checkout-dialog').showModal();}
-document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.details)showDetails(b.dataset.details);if(b.dataset.add)addToBag(b.dataset.add);if(b.dataset.remove){bag.delete(b.dataset.remove);renderBag();}if(b.dataset.quantity){state=store.load();const p=state.products.find(p=>p.id===b.dataset.quantity);if(!p)return;const q=(bag.get(p.id)||0)+Number(b.dataset.delta);if(q<=0)bag.delete(p.id);else bag.set(p.id,Math.min(q,p.stock));render();}});
+document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.details)showDetails(b.dataset.details);if(b.dataset.add)addToBag(b.dataset.add);if(b.dataset.decrease)removeOneFromBag(b.dataset.decrease);if(b.dataset.remove){bag.delete(b.dataset.remove);renderBag();}if(b.dataset.quantity){state=store.load();const p=state.products.find(p=>p.id===b.dataset.quantity);if(!p)return;const q=(bag.get(p.id)||0)+Number(b.dataset.delta);if(q<=0)bag.delete(p.id);else bag.set(p.id,Math.min(q,p.stock));render();}});
 $('checkout-form').addEventListener('submit',e=>{e.preventDefault();const f=e.currentTarget;if(!f.reportValidity())return;$('place-order').disabled=true;try{const order=store.createOrder({customer:f.elements.customer.value,email:f.elements.email.value,paymentStatus:'Demo — no payment',source:'Storefront',items:[...bag].map(([productId,quantity])=>({productId,quantity}))});bag.clear();render();$('checkout-dialog').close();$('confirmation-text').textContent=order.id+' · '+money(store.orderTotal(order))+' — saved to the admin Orders page.';$('confirmation-dialog').showModal();}catch(err){$('checkout-error').textContent=err.message;$('place-order').disabled=!bag.size;}});
 window.addEventListener('storage',e=>{if(e.key===store.key)render();});window.addEventListener('focus',render);window.addEventListener('meridian-store-change',render);
 for(const d of document.querySelectorAll('dialog'))d.addEventListener('click',e=>{if(e.target===d){const r=d.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)d.close();}});

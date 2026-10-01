@@ -174,3 +174,5 @@ dialog::backdrop{background:#0008}
 .cart-watch-image{width:72px;height:72px;object-fit:cover;display:block;background:#131918}
 .cart-line-price{white-space:nowrap}
 @media(max-width:420px){.cart-row{grid-template-columns:60px minmax(0,1fr);gap:12px}.cart-watch-image{width:60px;height:60px}.cart-line-price{grid-column:2}}
+
+.remove-from-bag{display:inline-flex;align-items:center;min-height:40px;margin-top:4px;padding:8px 0;border:0;background:transparent;color:#5a635a;font-size:12px;text-decoration:underline;text-underline-offset:3px}
