@@ -33,10 +33,29 @@
   let enabled=true;
   let retryOnInteraction=true;
   let attempt=0;
-  music.volume=Number(volume.value)/100;
+  let selectedVolume=Number(volume.value)/100;
+  let fadeTimer;
+  let fading=false;
+  const fadeDuration=800;
+  function stopFade() {
+    clearTimeout(fadeTimer);fading=false;
+  }
+  function fadeTo(target,onComplete) {
+    stopFade();fading=true;
+    const start=music.volume;const started=Date.now();
+    function step() {
+      const progress=Math.min(1,(Date.now()-started)/fadeDuration);
+      const eased=progress*progress*(3-2*progress);
+      music.volume=start+(target-start)*eased;
+      if(progress<1)fadeTimer=setTimeout(step,16);
+      else {fading=false;onComplete?.();}
+    }
+    step();
+  }
+  music.volume=0;
   controls.hidden=false;
   function render() {
-    const playing=!music.paused;
+    const playing=enabled&&!music.paused;
     toggle.setAttribute('aria-pressed',String(playing));
     const label=playing?'Pause background music':'Play background music';
     toggle.setAttribute('aria-label',label);
@@ -44,10 +63,13 @@
   }
   async function play() {
     const current=++attempt;
+    stopFade();
+    if(music.paused)music.volume=0;
     try {
       await music.play();
+      if(current!==attempt)return;
       if(!enabled||document.hidden) music.pause();
-      else {retryOnInteraction=false;status.textContent='';}
+      else {retryOnInteraction=false;status.textContent='';fadeTo(selectedVolume);}
     } catch(error) {
       if(current!==attempt) return;
       enabled=false;
@@ -66,13 +88,19 @@
     enabled=!enabled;
     status.textContent='';
     if(enabled) void play();
-    else {attempt++;music.pause();render();}
+    else {attempt++;fadeTo(0,()=>music.pause());render();}
   });
-  volume.addEventListener('input',()=>{music.volume=Number(volume.value)/100;});
+  volume.addEventListener('input',()=>{
+    selectedVolume=Number(volume.value)/100;
+    if(enabled&&!music.paused){
+      if(fading)fadeTo(selectedVolume);
+      else music.volume=selectedVolume;
+    }
+  });
   music.addEventListener('play',render);
   music.addEventListener('pause',render);
   music.addEventListener('error',()=>{
-    attempt++;enabled=false;retryOnInteraction=false;music.pause();render();
+    attempt++;stopFade();enabled=false;retryOnInteraction=false;music.pause();music.volume=0;render();
     status.textContent='Music is currently unavailable. Please try again later.';
   });
   function retry(event) {
@@ -83,7 +111,7 @@
   document.addEventListener('pointerdown',retry);
   document.addEventListener('keydown',retry);
   document.addEventListener('visibilitychange',()=>{
-    if(document.hidden) {attempt++;music.pause();adjustingVolume=false;hideVolume();}
+    if(document.hidden) {attempt++;stopFade();music.pause();music.volume=0;adjustingVolume=false;hideVolume();}
     else if(enabled) void play();
   });
   render();
