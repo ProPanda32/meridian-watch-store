@@ -20,3 +20,14 @@ test('invalid or unavailable checkout does not create an order or change stock',
 });
 test('failed storage reports failure and does not claim checkout success',()=>{const b=browser(new Map(),true);assert.throws(()=>b.store.createOrder({customer:'Test',email:'test@example.com',items:[{productId:'noir',quantity:1}]}),/could not save/);assert.equal(b.store.load().orders.length,3);});
 test('checkout checks the latest shared stock before saving',()=>{const b=browser(),other=browser(b.storage);other.store.createOrder({customer:'Test A',email:'a@example.com',items:[{productId:'everyday',quantity:3}]});assert.throws(()=>b.store.createOrder({customer:'Test B',email:'b@example.com',items:[{productId:'everyday',quantity:1}]}),/insufficient stock/);assert.equal(b.store.load().orders.length,4);});
+test('stock imagery migrates without losing browser orders or admin edits',()=>{
+  const b=browser(),state=b.store.load();
+  state.products[0].image='https://images.unsplash.com/photo-1630512731371-a3747ab932ed?auto=format&fit=crop&w=1000&q=85';
+  state.products[0].stock=4;state.products[0].price=250;state.products[0].description='Owner description';
+  state.products[1].image='https://example.com/custom.webp';
+  b.storage.set(b.store.key,JSON.stringify(state));
+  const migrated=b.store.load();assert.equal(migrated.products[0].image,'assets/watches/champagne-moonphase.webp');
+  assert.equal(migrated.products[0].stock,4);assert.equal(migrated.products[0].price,250);assert.equal(migrated.products[0].description,'Owner description');
+  assert.equal(migrated.products[1].image,'https://example.com/custom.webp');assert.equal(JSON.stringify(migrated.orders),JSON.stringify(state.orders));
+  b.store.save(migrated);assert.equal(b.store.load().products[0].image,migrated.products[0].image);
+});

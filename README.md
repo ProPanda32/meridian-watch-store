@@ -52,13 +52,10 @@ Run `npm test`. Tests cover storefront-to-admin order persistence, order price s
 - `server.mjs`: optional static preview server
 - `test/demo.test.mjs`: shared checkout model tests
 
-## Photography
+## Watch imagery
 
-Illustrative images by Laura Chouette and Swapnil B via Unsplash:
+Original AI-generated images from the **Create Watch Image** chat, bundled as optimized WebP files in `assets/watches/`. The latest refined champagne-gold moonphase and skeleton images are paired with the white and gold midnight-blue watch.
 
-- https://unsplash.com/photos/black-leather-strap-gold-round-analog-watch-nIB3y79RERU
-- https://unsplash.com/photos/black-and-silver-analog-watch-el44aDkmles
-- https://unsplash.com/photos/black-and-silver-analog-watch-8xg3pB9V-O4
-- https://unsplash.com/photos/a-watch-on-a-wrist-7rj4hxIwdBs
+Existing browser data automatically replaces the original stock images and unedited style descriptions while preserving custom images, prices, stock, visibility and orders. Admin accepts HTTPS image URLs or bundled `assets/watches/*.webp` paths.
 
-Names and prices are sample data and do not identify the brands pictured.
+Names and prices remain illustrative sample data.

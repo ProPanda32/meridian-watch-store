@@ -5,9 +5,9 @@
     version: 1,
     settings: {name: 'Merlock', announcement: 'THE MERLOCK EDIT · A WATCH FOR EVERY CHAPTER'},
     products: [
-      {id:'noir',name:'The Noir',style:'Black leather · Gold tone',price:185,stock:12,active:true,image:'https://images.unsplash.com/photo-1630512731371-a3747ab932ed?auto=format&fit=crop&w=1000&q=85',description:'A dark dial, warm gold tones and a classic leather strap. A refined companion for evenings and everyday wear.',badge:'The signature edit'},
-      {id:'silver',name:'The Silver',style:'Black leather · Silver tone',price:165,stock:8,active:true,image:'https://images.unsplash.com/photo-1630512731154-ed3afce20505?auto=format&fit=crop&w=1000&q=85',description:'A crisp silver-tone case and a pared-back black dial. Understated style with a versatile monochrome palette.',badge:'Everyday classic'},
-      {id:'everyday',name:'The Everyday',style:'Minimal dial · Leather strap',price:195,stock:3,active:true,image:'https://images.unsplash.com/photo-1660287049716-036751adfa1b?auto=format&fit=crop&w=1000&q=85',description:'Clean lines and an easy-wearing profile. A simple expression of everyday style, from your morning coffee to your last meeting.',badge:'A considered choice'}
+      {id:'noir',name:'The Noir',style:'Champagne gold · Celestial dial',price:185,stock:12,active:true,image:'assets/watches/champagne-moonphase.webp',description:'An engraved champagne-gold bracelet and a starry midnight dial with a moonphase-inspired detail. A celestial expression of understated luxury.',badge:'The signature edit'},
+      {id:'silver',name:'The Silver',style:'White bracelet · Midnight-blue dial',price:165,stock:8,active:true,image:'assets/watches/midnight-moonphase.webp',description:'A white and gold-tone bracelet frames a midnight-blue celestial dial. A crisp, considered palette with a moonphase-inspired detail.',badge:'Everyday classic'},
+      {id:'everyday',name:'The Everyday',style:'Champagne gold · Skeleton dial',price:195,stock:3,active:true,image:'assets/watches/champagne-skeleton.webp',description:'An open-work dial reveals intricate gold and silver-tone details, framed by an engraved champagne-gold bezel. A distinctive expression of mechanical design.',badge:'A considered choice'}
     ],
     orders: [
       {id:'DEMO-1003',date:'2026-10-01',customer:'Sample customer A',email:'customer-a@example.com',status:'Processing',items:[{productId:'noir',name:'The Noir',quantity:1,unitPrice:185}],notes:''},
@@ -15,6 +15,7 @@
       {id:'DEMO-1001',date:'2026-09-29',customer:'Sample customer C',email:'customer-c@example.com',status:'Delivered',items:[{productId:'everyday',name:'The Everyday',quantity:1,unitPrice:195}],notes:''}
     ]
   };
+  const legacyProducts = [{"id": "noir", "image": "https://images.unsplash.com/photo-1630512731371-a3747ab932ed?auto=format&fit=crop&w=1000&q=85", "style": "Black leather · Gold tone", "description": "A dark dial, warm gold tones and a classic leather strap. A refined companion for evenings and everyday wear."}, {"id": "silver", "image": "https://images.unsplash.com/photo-1630512731154-ed3afce20505?auto=format&fit=crop&w=1000&q=85", "style": "Black leather · Silver tone", "description": "A crisp silver-tone case and a pared-back black dial. Understated style with a versatile monochrome palette."}, {"id": "everyday", "image": "https://images.unsplash.com/photo-1660287049716-036751adfa1b?auto=format&fit=crop&w=1000&q=85", "style": "Minimal dial · Leather strap", "description": "Clean lines and an easy-wearing profile. A simple expression of everyday style, from your morning coffee to your last meeting."}];
   const copy = v => JSON.parse(JSON.stringify(v));
   const statuses = ['Processing','Shipped','Delivered','Cancelled'];
   function validate(s) {
@@ -25,7 +26,9 @@
       ids.add(p.id);
       for (const field of ['name','style','image','description','badge']) if(typeof p[field]!=='string' || p[field].length>2000) throw Error('Invalid product text.');
       if(!p.name.trim() || p.name.length>80 || !Number.isFinite(p.price) || p.price<0 || p.price>1000000 || Math.abs(p.price*100-Math.round(p.price*100))>0.000001 || !Number.isSafeInteger(p.stock) || p.stock<0 || p.stock>1000000 || typeof p.active!=='boolean') throw Error('Enter a valid price and whole-number stock level.');
-      const url=new URL(p.image); if(url.protocol!=='https:') throw Error('Product images must use HTTPS.');
+      if (!/^assets\/watches\/[a-z0-9-]+\.webp$/.test(p.image)) {
+        const url=new URL(p.image); if(url.protocol!=='https:') throw Error('Use an HTTPS image URL or a bundled assets/watches/*.webp path.');
+      }
     }
     const orderIds=new Set();
     for(const o of s.orders) {
@@ -36,7 +39,15 @@
     return s;
   }
   function load() {
-    try { const raw=localStorage.getItem(key); return raw ? copy(validate(JSON.parse(raw))) : copy(defaults); }
+    try { const raw=localStorage.getItem(key); if (!raw) return copy(defaults);
+      const state=validate(JSON.parse(raw));
+      for (const legacy of legacyProducts) {
+        const product=state.products.find(p=>p.id===legacy.id);
+        const replacement=defaults.products.find(p=>p.id===legacy.id);
+        if (product?.image===legacy.image) product.image=replacement.image;
+        for (const field of ['style','description']) if(product?.[field]===legacy[field]) product[field]=replacement[field];
+      }
+      return copy(state); }
     catch { return copy(defaults); }
   }
   function save(state) {
