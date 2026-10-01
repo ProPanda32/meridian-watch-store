@@ -42,7 +42,13 @@
         <span id="film-status" class="sr-only" role="status"></span>
       </div>
     </section>
-    <section class="collection" id="collection" aria-labelledby="collection-title"><div class="section-top"><div><p class="eyebrow">The curated collection</p><h2 id="collection-title">Find your everyday icon.</h2></div><span class="section-note">Discover your next everyday icon</span></div><div class="products" id="products"></div></section>
+    <section class="collection" id="collection" aria-labelledby="collection-title"><div class="section-top"><div><p class="eyebrow">The curated collection</p><h2 id="collection-title">Find your everyday icon.</h2></div><span class="section-note">Discover your next everyday icon</span></div><div class="collection-tabs" role="tablist" aria-label="Watch collections">
+      <button id="collection-tab-all" role="tab" type="button" aria-selected="true" aria-controls="products" tabindex="0" data-collection="all">All watches <span data-collection-count="all">12</span></button>
+      <button id="collection-tab-celestial" role="tab" type="button" aria-selected="false" aria-controls="products" tabindex="-1" data-collection="celestial">Celestial <span data-collection-count="celestial">3</span></button>
+      <button id="collection-tab-dress" role="tab" type="button" aria-selected="false" aria-controls="products" tabindex="-1" data-collection="dress">Dress <span data-collection-count="dress">3</span></button>
+      <button id="collection-tab-sport" role="tab" type="button" aria-selected="false" aria-controls="products" tabindex="-1" data-collection="sport">Sport <span data-collection-count="sport">3</span></button>
+      <button id="collection-tab-statement" role="tab" type="button" aria-selected="false" aria-controls="products" tabindex="-1" data-collection="statement">Statement <span data-collection-count="statement">3</span></button>
+    </div><p id="collection-status" class="sr-only" role="status"></p><div class="products" id="products" role="tabpanel" aria-labelledby="collection-tab-all" tabindex="0"></div></section>
     <section class="editorial" id="philosophy"><div><p class="eyebrow">The Merlock perspective</p><h2>Less noise.<br>More character.</h2></div><p>A watch is a small detail that says a great deal. Our edit celebrates celestial dials, intricate details, considered proportions and pieces that feel just as natural with a weekend shirt as an evening jacket.</p></section>
   </main>
   <footer><div class="logo">MERLOCK</div><div>Storefront preview · Sample catalogue and illustrative prices.<br>Original AI-generated watch imagery from Create Watch Image.<br><a href="https://github.com/craftonautJP/imperfect-piano-performances" target="_blank" rel="noopener noreferrer">Piano: Chopin · Prelude in A major</a></div><div><a href="admin.html">Admin sign-in</a><br>© <span id="year"></span> Merlock</div></footer>

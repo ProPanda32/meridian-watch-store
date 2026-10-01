@@ -104,3 +104,9 @@ The fixed header overlays the full-height hero with white navigation on a transp
 The second uploaded collage is renamed `sources/merlock-dress-and-sport-collection.png`. Its five watches are individually cropped into square WebP images, omitting divider lines and keeping each full watch visible. The Estelle, Luna, Sylvan, Elara and Eclipse bring the default catalogue to 12 products. Their prices and initial stock levels are sample values editable in admin.
 
 Returning browsers receive this collection once while retaining existing catalogue edits, stock levels and order snapshots. Later changes or deletions to the new listings are preserved once saved. All five listings work with storefront details, search, checkout and admin editing.
+
+## Collection tabs
+
+All watches is selected on page load and shows the full active catalogue. Four themes contain three watches each: Celestial (Aurelia, Selene, Luna), Dress (Estelle, Elara, Argent), Sport (Mariner, Sylvan, Voyager), and Statement (Verdant, Obsidian, Eclipse). Any extra products added in admin appear in All watches. Tab counts reflect active products; existing search still covers the whole catalogue.
+
+Tabs support click, arrow keys, Home and End, with one keyboard tab stop and a labelled product panel. Switching collections preserves the bag and the current collection survives stock updates and checkout. On mobile the tab strip scrolls horizontally.

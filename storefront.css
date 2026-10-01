@@ -152,3 +152,11 @@ dialog::backdrop{background:#0008}
 .music-controls input{width:64px;min-height:44px;accent-color:#202522;cursor:pointer}
 .music-ready .toast{bottom:88px}
 @media(max-width:600px){.music-controls{right:12px;bottom:12px;gap:6px}}
+
+.collection-tabs{display:flex;gap:10px;overflow-x:auto;max-width:100%;margin:0 0 30px;border-bottom:1px solid var(--line);scrollbar-width:thin}
+.collection-tabs button{display:flex;align-items:center;gap:9px;flex-shrink:0;min-height:48px;padding:12px 18px;border:0;border-bottom:2px solid transparent;background:transparent;color:#666b63;font-size:14px;white-space:nowrap}
+.collection-tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--ink);font-weight:600}
+.collection-tabs button:hover{color:var(--ink)}
+.collection-tabs button:focus-visible{outline-offset:-4px}
+.collection-tabs span{font-size:11px;line-height:1.5;min-width:20px;text-align:center;background:#e7e7e0;border-radius:12px;padding:1px 5px;font-weight:400}
+@media(max-width:600px){.collection-tabs{gap:2px;margin-bottom:24px}.collection-tabs button{padding:12px}}

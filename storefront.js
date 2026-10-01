@@ -1,9 +1,39 @@
 const store=window.MeridianStore,esc=store.escape,money=store.money,$=id=>document.getElementById(id);
 let state=store.load();const bag=new Map();let toastTimer;
+const collectionGroups={
+  celestial:['noir','silver','navy-moonphase'],
+  dress:['gold-rectangle','pearl-two-tone','silver-blue'],
+  sport:['blue-steel','green-chronograph','two-tone-gmt'],
+  statement:['emerald-gold','obsidian-black','black-skeleton']
+};
+let selectedCollection='all';
+function collectionProducts(group){return state.products.filter(p=>p.active&&(group==='all'||collectionGroups[group].includes(p.id)));}
+function selectCollection(button){selectedCollection=button.dataset.collection;render();}
+const collectionTabs=document.querySelector('.collection-tabs');
+collectionTabs.addEventListener('click',event=>{const button=event.target.closest('[data-collection]');if(button)selectCollection(button);});
+collectionTabs.addEventListener('keydown',event=>{
+  const buttons=[...collectionTabs.querySelectorAll('[role="tab"]')],index=buttons.indexOf(event.target);
+  if(index<0)return;
+  let next;
+  if(event.key==='ArrowRight')next=(index+1)%buttons.length;
+  else if(event.key==='ArrowLeft')next=(index+buttons.length-1)%buttons.length;
+  else if(event.key==='Home')next=0;
+  else if(event.key==='End')next=buttons.length-1;
+  else return;
+  event.preventDefault();selectCollection(buttons[next]);buttons[next].focus();
+});
 function toast(message){$('toast').textContent=message;$('toast').style.display='block';clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').style.display='none',2500);}
 function render(){state=store.load();document.title=state.settings.name+' | Time, well chosen.';document.querySelectorAll('.logo').forEach(el=>el.textContent=state.settings.name.toUpperCase());document.querySelector('.announcement').textContent=state.settings.announcement;$('year').textContent=new Date().getFullYear();
   for(const [id,q]of bag){const p=state.products.find(p=>p.id===id);if(!p||!p.active||p.stock===0)bag.delete(id);else if(q>p.stock)bag.set(id,p.stock);}
-  $('products').innerHTML=state.products.filter(p=>p.active).map(p=>`<article><div class="product-image"><img src="${esc(p.image)}" alt="${esc(p.style)} watch" loading="lazy"><span class="badge">${esc(p.badge)}</span></div><div class="product-info"><div><h3>${esc(p.name)}</h3><p>${esc(p.style)}</p></div><span class="price">${money(p.price)}</span></div><div class="product-actions"><button data-details="${p.id}">View details</button><button data-add="${p.id}" ${p.stock===0?'disabled':''}>${p.stock===0?'Out of stock':'Add to bag'}</button></div></article>`).join('')||'<p>No products are currently available.</p>';renderBag();
+  for(const button of collectionTabs.querySelectorAll('[data-collection]')){
+    const selected=button.dataset.collection===selectedCollection;
+    button.setAttribute('aria-selected',String(selected));button.tabIndex=selected?0:-1;
+    button.querySelector('[data-collection-count]').textContent=collectionProducts(button.dataset.collection).length;
+  }
+  const visibleProducts=collectionProducts(selectedCollection);
+  $('products').setAttribute('aria-labelledby','collection-tab-'+selectedCollection);
+  $('collection-status').textContent=`Showing ${visibleProducts.length} ${visibleProducts.length===1?'watch':'watches'}.`;
+  $('products').innerHTML=visibleProducts.map(p=>`<article><div class="product-image"><img src="${esc(p.image)}" alt="${esc(p.style)} watch" loading="lazy"><span class="badge">${esc(p.badge)}</span></div><div class="product-info"><div><h3>${esc(p.name)}</h3><p>${esc(p.style)}</p></div><span class="price">${money(p.price)}</span></div><div class="product-actions"><button data-details="${p.id}">View details</button><button data-add="${p.id}" ${p.stock===0?'disabled':''}>${p.stock===0?'Out of stock':'Add to bag'}</button></div></article>`).join('')||'<p>No watches are currently available in this collection.</p>';renderBag();
 }
 function bagItems(){return [...bag].map(([id,quantity])=>({product:state.products.find(p=>p.id===id),quantity}));}
 function renderBag(){const items=bagItems();$('bag-count').textContent=items.reduce((s,i)=>s+i.quantity,0);$('cart-items').innerHTML=items.length?items.map(({product:p,quantity:q})=>`<div class="cart-row"><div><p>${esc(p.name)}</p><div class="quantity"><button data-quantity="${p.id}" data-delta="-1" aria-label="Decrease ${esc(p.name)} quantity">−</button><span>${q}</span><button data-quantity="${p.id}" data-delta="1" aria-label="Increase ${esc(p.name)} quantity" ${q>=p.stock?'disabled':''}>+</button><button class="remove" data-remove="${p.id}" style="width:auto">Remove</button></div></div><span>${money(p.price*q)}</span></div>`).join(''):'<p class="details">Your bag is empty. Find a watch that feels like you.</p>';$('subtotal').textContent=money(items.reduce((s,i)=>s+i.quantity*i.product.price,0));$('checkout-button').disabled=!items.length;if($('checkout-dialog').open)renderCheckout();}
