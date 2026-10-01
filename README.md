@@ -20,9 +20,9 @@ The login flow is intentionally browser-based with public demo credentials. It i
 
 ## Included
 
-- Full-width watch film, centered brand header, collection search and navigation drawer.
+- Recovered full-width hero layout, centered brand header, collection search and navigation drawer.
 - Scroll-linked film zoom and title fade, followed by a subtle collection reveal.
-- Pause/play control, poster fallback, offscreen playback suspension and reduced-motion support.
+- Film playback controls, poster support, offscreen playback suspension and reduced-motion support, ready for the pending media assets.
 - Storefront product details, bag quantities, stock limits and demo checkout.
 - Orders shared between the storefront and admin dashboard in the same browser.
 - Automatic updates across open tabs, plus refresh when a page regains focus.
@@ -45,7 +45,9 @@ The live workspace, login API, database and real-order backend have been removed
 
 ## Checks
 
-Run `npm test`. Tests cover storefront-to-admin order persistence, order price snapshots, stock updates, invalid/unavailable items, duplicate items, latest-stock checks, failed-storage handling, landing assets and video byte-range requests.
+Run `node --test test/demo.test.mjs` for the data and checkout tests. These cover storefront-to-admin order persistence, order price snapshots, stock updates, invalid/unavailable items, duplicate items, latest-stock checks, failed-storage handling, imagery migration and catalogue copy migration. All six tests passed during recovery validation.
+
+`npm test` also runs `test/server.test.mjs`, which covers landing assets, HTTP metadata and video byte-range requests. The full suite currently fails with `ENOENT` because the video files are absent. The server tests also require the poster and WebM alternative; run the full suite again after all media assets are restored.
 
 ## Files
 
@@ -61,10 +63,24 @@ Run `npm test`. Tests cover storefront-to-admin order persistence, order price s
 
 Original AI-generated images from the **Create Watch Image** chat, bundled as optimized WebP files in `assets/watches/`. The latest refined champagne-gold moonphase and skeleton images are paired with the white and gold midnight-blue watch.
 
-Existing browser data automatically replaces the original stock images and unedited style descriptions while preserving custom images, prices, stock, visibility and orders. Admin accepts HTTPS image URLs or bundled `assets/watches/*.webp` paths.
+The sample collection is **The Aurelia**, **The Selene** and **The Aster**. Existing browser data automatically replaces the original stock images and unedited catalogue names, styles and descriptions while preserving custom edits, prices, stock, visibility and existing order snapshots. Admin accepts HTTPS image URLs or bundled `assets/watches/*.webp` paths.
 
 Names and prices remain illustrative sample data.
 
-The supplied luxury watch film is bundled as `assets/watches/landing-page-video.webm` (VP9) and `landing-page-video.mp4` (H.264 with fast-start metadata), retaining its 1916 x 1080 resolution. The browser loads one supported format. `landing-page-poster.webp` is a frame from that film. The film is silent; the speaker indicator is informational, not a mute toggle. Playback starts muted when motion is allowed, pauses offscreen, and remains paused after a visitor pauses it. Reduced-motion visitors see the poster and can choose to play the film.
+## Landing media — pending integration
+
+The original `Landing Page video.mp4` has been supplied again, but it has not been added to this repository. The recovered page references these paths, which are currently absent:
+
+- `assets/watches/landing-page-video.mp4`
+- `assets/watches/landing-page-video.webm`
+- `assets/watches/landing-page-poster.webp`
+
+Until those assets are restored, the hero film and poster are unavailable. Requests for the missing media can also cause the Node preview server to exit because its file reads are not guarded against missing assets. Video integration and validation remain pending; this recovery merge did not add or modify video assets.
+
+## Recovery status
+
+`recovery/watch-landing-2026-10-01` was merged into `main` on 1 October 2026 in [PR #1](https://github.com/ProPanda32/project-watch-store/pull/1), producing merge commit `c9b6a00ef2a03816f8c27697f22537f0164e0657`.
+
+The recovery commit `c7e0bda9b2af8d6a77d514e7049ad4f04fda6a85` was directly based on the then-current `main`, `be85d5460ec8b7ee7d06626dcaf4801c2410e91a` (generated Merlock watch imagery). There were no intervening main commits and no merge conflicts. The generated watch images, admin files and storefront checkout script were unchanged, and no files were deleted. Any `sources/` files are read-only reference material.
 
 Navigation and playback icons use Lucide geometry; its license is included in `assets/lucide-license.txt`.
