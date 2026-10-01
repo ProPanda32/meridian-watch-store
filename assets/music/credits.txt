@@ -1,0 +1,13 @@
+Track: Waltz in A minor, B. 150 (Op. posth.), Frederic Chopin
+Recording: craftonautJP, Imperfect Piano Performances, take 01_02
+Source: https://github.com/craftonautJP/imperfect-piano-performances
+Audio: 01_Chopin_Waltz-No19-Aminor-Op-posth/01_02.mp3
+Composition: public domain (Chopin, 1810–1849).
+Recording dedication: repository README explicitly states CC0 1.0 Universal
+for the recordings; repository LICENSE additionally contains the Unlicense.
+README: https://github.com/craftonautJP/imperfect-piano-performances/blob/main/README.md
+LICENSE: https://github.com/craftonautJP/imperfect-piano-performances/blob/main/LICENSE
+Retrieved: 2026-10-01
+Processing: encoded as 128 kbps MP3, normalized to -22 LUFS with a -3 dB true
+peak limit, two-second fade-in. Full recording retained (approximately 164 s).
+The source describes the performance as a piano practice recording.

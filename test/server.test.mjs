@@ -66,3 +66,14 @@ test('five individual product images are available to storefront and admin',asyn
 test('removed skeleton product image is no longer served',async()=>{
   assert.equal((await fetch(base+'/assets/watches/champagne-skeleton.webp')).status,404);
 });
+
+test('background piano supports audio metadata and byte-range downloads',async()=>{
+  const path='/assets/music/chopin-waltz-a-minor.mp3';
+  const audio=readFileSync(new URL('../assets/music/chopin-waltz-a-minor.mp3',import.meta.url));
+  const head=await fetch(base+path,{method:'HEAD'});
+  assert.equal(head.status,200);assert.equal(head.headers.get('content-type'),'audio/mpeg');
+  assert.equal(Number(head.headers.get('content-length')),audio.length);
+  const response=await fetch(base+path,{headers:{Range:'bytes=0-1023'}});
+  assert.equal(response.status,206);assert.deepEqual(Buffer.from(await response.arrayBuffer()),audio.subarray(0,1024));
+  assert.equal((await fetch(base+'/music.js')).status,200);
+});

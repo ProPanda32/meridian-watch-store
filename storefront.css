@@ -143,3 +143,10 @@ dialog::backdrop{background:#0008}
   .hero-media,.hero-copy,.reveal{transform:none;opacity:1;will-change:auto}
   .product-image img,.reveal,.site-header{transition:none}
 }
+
+.music-controls{position:fixed;right:20px;bottom:20px;z-index:35;display:flex;align-items:center;gap:14px;background:var(--paper);color:var(--ink);border:1px solid #c9c9c2;border-radius:28px;padding:4px 16px 4px 8px;box-shadow:0 4px 20px #0002}
+.music-controls button{display:flex;align-items:center;gap:9px;min-height:44px;border:0;border-radius:22px;padding:0 10px;background:transparent;color:inherit;font-size:12px}
+.music-controls .icon{width:15px;height:15px}
+.music-controls input{width:64px;min-height:44px;accent-color:#202522;cursor:pointer}
+.music-ready .toast{bottom:88px}
+@media(max-width:600px){.music-controls{right:12px;bottom:12px;gap:6px}}

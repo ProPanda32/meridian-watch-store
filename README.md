@@ -47,7 +47,7 @@ The live workspace, login API, database and real-order backend have been removed
 
 Run `node --test test/demo.test.mjs` for the data and checkout tests. These cover storefront-to-admin order persistence, order price snapshots, stock updates, invalid/unavailable items, duplicate items, latest-stock checks, failed-storage handling, imagery migration and catalogue copy migration. All six tests passed during recovery validation.
 
-`npm test` runs all 16 checkout and server tests, including landing assets, HTTP metadata, full video downloads, byte-range requests and the WebM alternative. All 16 tests pass, including removed-product migration and image-route removal.
+`npm test` runs all 20 checkout, music-control and server tests, including landing assets, HTTP metadata, full video downloads, byte-range requests and the WebM alternative. All 20 tests pass, including removed-product migration and image-route removal.
 
 ## Files
 
@@ -86,3 +86,9 @@ Navigation and playback icons use Lucide geometry; its license is included in `a
 The uploaded collage is preserved as `sources/merlock-five-watch-collection.png`. Its five panels are cropped without the dividing lines into optimized WebP files in `assets/watches/`. The Verdant, Mariner, Obsidian, Argent and Voyager join the two existing watches in the storefront, search, checkout and admin catalogue. Names, prices and initial stock levels are illustrative and editable in admin; descriptions refer to the visible designs rather than verified specifications.
 
 Returning browsers receive the five new listings once without changing existing products, custom edits or order snapshots. Once saved, the migration marker also preserves later edits and deletions to the new products. Product cards use centered square framing, trimming excess landscape background while preserving the watches. The tall Selene photo fits within the square to preserve its bracelet. The Aster listing and its skeleton image have been removed; historical order snapshots remain intact.
+
+## Background piano
+
+Visitors can turn on Chopin’s Waltz in A minor using the fixed Piano control and adjust its volume. Audio is off on every page load and downloads only after interaction. It loops independently of the silent hero video, pauses when the tab is hidden, and resumes only if the visitor had enabled it. Playback errors leave the control off with an accessible status message.
+
+The composition is public domain. The recording is from craftonautJP’s Imperfect Piano Performances; its README dedicates the recordings under CC0, and its LICENSE includes the Unlicense public-domain dedication. See `assets/music/credits.txt` for sources and processing details.
