@@ -43,3 +43,31 @@ test('catalogue copy updates old defaults while preserving custom text and order
   assert.equal(updated.orders[0].items[0].name,'The Noir');
   const order=b.store.createOrder({customer:'Test',email:'test@example.com',items:[{productId:'noir',quantity:1}]});assert.equal(order.items[0].name,'The Aurelia');
 });
+
+test('five-watch collection migrates once while preserving catalogue edits and order snapshots',()=>{
+  const b=browser(),old=b.store.load();
+  old.products=old.products.slice(0,3);delete old.fiveWatchCollectionAdded;
+  old.products[0].name='Owner custom name';old.products[0].price=250;old.products[0].stock=4;
+  const orders=JSON.stringify(old.orders);
+  b.storage.set(b.store.key,JSON.stringify(old));
+  const updated=b.store.load();assert.equal(updated.products.length,8);
+  assert.equal(updated.products[0].name,'Owner custom name');assert.equal(updated.products[0].price,250);assert.equal(updated.products[0].stock,4);
+  assert.equal(JSON.stringify(updated.orders),orders);
+  updated.products.find(p=>p.id==='emerald-gold').price=300;
+  updated.products=updated.products.filter(p=>p.id!=='blue-steel');
+  b.store.save(updated);
+  const saved=b.store.load();assert.equal(saved.products.length,7);
+  assert.equal(saved.products.find(p=>p.id==='emerald-gold').price,300);
+  assert.equal(saved.products.some(p=>p.id==='blue-steel'),false);
+});
+test('all five new watches can be ordered with distinct image paths and stock snapshots',()=>{
+  const b=browser(),ids=['emerald-gold','blue-steel','obsidian-black','silver-blue','two-tone-gmt'];
+  const initial=b.store.load(),newProducts=ids.map(id=>initial.products.find(p=>p.id===id));
+  assert.equal(new Set(newProducts.map(p=>p.image)).size,5);
+  const order=b.store.createOrder({customer:'Demo',email:'demo@example.com',items:ids.map(productId=>({productId,quantity:1}))});
+  assert.equal(order.items.length,5);assert.equal(b.store.orderTotal(order),935);
+  for(const product of newProducts){
+    assert.equal(b.store.load().products.find(p=>p.id===product.id).stock,product.stock-1);
+    assert.equal(order.items.find(i=>i.productId===product.id).unitPrice,product.price);
+  }
+});

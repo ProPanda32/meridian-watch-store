@@ -80,3 +80,9 @@ The film is silent. Playback starts muted when motion is allowed, pauses offscre
 The recovery commit `c7e0bda9b2af8d6a77d514e7049ad4f04fda6a85` was directly based on the then-current `main`, `be85d5460ec8b7ee7d06626dcaf4801c2410e91a` (generated Merlock watch imagery). There were no intervening main commits and no merge conflicts. The generated watch images, admin files and storefront checkout script were unchanged, and no files were deleted. Any `sources/` files are read-only reference material.
 
 Navigation and playback icons use Lucide geometry; its license is included in `assets/lucide-license.txt`.
+
+## Five-watch collection
+
+The uploaded collage is preserved as `sources/merlock-five-watch-collection.png`. Its five panels are cropped without the dividing lines into optimized WebP files in `assets/watches/`. The Verdant, Mariner, Obsidian, Argent and Voyager join the three existing watches in the storefront, search, checkout and admin catalogue. Names, prices and initial stock levels are illustrative and editable in admin; descriptions refer to the visible designs rather than verified specifications.
+
+Returning browsers receive the five new listings once without changing existing products, custom edits or order snapshots. Once saved, the migration marker also preserves later edits and deletions to the new products. Product cards show the entire image without cropping the watch.

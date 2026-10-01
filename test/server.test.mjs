@@ -53,3 +53,11 @@ test('malformed ranges and non-public paths are rejected without crashing the se
   assert.equal((await fetch(base+'/',{method:'POST'})).status,405);
   assert.equal((await fetch(base+'/')).status,200);
 });
+
+test('five individual product images are available to storefront and admin',async()=>{
+  for(const name of ['emerald-gold','blue-steel','obsidian-black','silver-blue','two-tone-gmt']){
+    const response=await fetch(base+`/assets/watches/${name}.webp`);
+    assert.equal(response.status,200);assert.equal(response.headers.get('content-type'),'image/webp');
+    assert.deepEqual(Buffer.from(await response.arrayBuffer()),readFileSync(new URL(`../assets/watches/${name}.webp`,import.meta.url)));
+  }
+});
