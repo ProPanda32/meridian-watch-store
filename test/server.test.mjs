@@ -68,8 +68,8 @@ test('removed skeleton product image is no longer served',async()=>{
 });
 
 test('background piano supports audio metadata and byte-range downloads',async()=>{
-  const path='/assets/music/chopin-waltz-a-minor.mp3';
-  const audio=readFileSync(new URL('../assets/music/chopin-waltz-a-minor.mp3',import.meta.url));
+  const path='/assets/music/chopin-prelude-a-major.mp3';
+  const audio=readFileSync(new URL('../assets/music/chopin-prelude-a-major.mp3',import.meta.url));
   const head=await fetch(base+path,{method:'HEAD'});
   assert.equal(head.status,200);assert.equal(head.headers.get('content-type'),'audio/mpeg');
   assert.equal(Number(head.headers.get('content-length')),audio.length);

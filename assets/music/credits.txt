@@ -1,13 +1,14 @@
-Track: Waltz in A minor, B. 150 (Op. posth.), Frederic Chopin
-Recording: craftonautJP, Imperfect Piano Performances, take 01_02
+Track: Prelude in A major, Op. 28 No. 7, Frederic Chopin
+Recording: craftonautJP, Imperfect Piano Performances, take 02_01
 Source: https://github.com/craftonautJP/imperfect-piano-performances
-Audio: 01_Chopin_Waltz-No19-Aminor-Op-posth/01_02.mp3
+Audio: 02_Chopin_Prelude-No7-Amajor/02_01.mp3
 Composition: public domain (Chopin, 1810–1849).
 Recording dedication: repository README explicitly states CC0 1.0 Universal
 for the recordings; repository LICENSE additionally contains the Unlicense.
 README: https://github.com/craftonautJP/imperfect-piano-performances/blob/main/README.md
 LICENSE: https://github.com/craftonautJP/imperfect-piano-performances/blob/main/LICENSE
 Retrieved: 2026-10-01
-Processing: encoded as 128 kbps MP3, normalized to -22 LUFS with a -3 dB true
-peak limit, two-second fade-in. Full recording retained (approximately 164 s).
+Processing: encoded as 128 kbps MP3, normalized to -26 LUFS with a -5 dB true
+peak limit, three-second fade-in and fade-out. Full recording retained
+(approximately 79 s). The player starts at 20% volume.
 The source describes the performance as a piano practice recording.

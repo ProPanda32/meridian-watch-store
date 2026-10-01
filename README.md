@@ -89,6 +89,8 @@ Returning browsers receive the five new listings once without changing existing 
 
 ## Background piano
 
-Visitors can turn on Chopin’s Waltz in A minor using the fixed Piano control and adjust its volume. Audio is off on every page load and downloads only after interaction. It loops independently of the silent hero video, pauses when the tab is hidden, and resumes only if the visitor had enabled it. Playback errors leave the control off with an accessible status message.
+Visitors can turn on Chopin’s Prelude in A major, Op. 28 No. 7 using the fixed Piano control and adjust its volume. Audio is off on every page load and downloads only after interaction. It loops independently of the silent hero video, pauses when the tab is hidden, and resumes only if the visitor had enabled it. Playback errors leave the control off with an accessible status message.
 
 The composition is public domain. The recording is from craftonautJP’s Imperfect Piano Performances; its README dedicates the recordings under CC0, and its LICENSE includes the Unlicense public-domain dedication. See `assets/music/credits.txt` for sources and processing details.
+
+The piano recording is normalized to -26 LUFS, starts at 20% volume and fades gently in and out. This slower major-key prelude replaces the earlier waltz.

@@ -5,7 +5,7 @@ import vm from 'node:vm';
 const source=readFileSync(new URL('../music.js',import.meta.url),'utf8');
 function player(){
   const elements=new Map();
-  function element(id){const events=new Map(),attributes={};return {hidden:true,value:'35',paused:true,textContent:'',attributes,
+  function element(id){const events=new Map(),attributes={};return {hidden:true,value:'20',paused:true,textContent:'',attributes,
     addEventListener(name,fn){events.set(name,fn);},emit(name){events.get(name)?.();},
     setAttribute(name,value){attributes[name]=value;},querySelector(){return element('use');}};}
   for(const id of ['background-music','music-controls','music-toggle','music-label','music-volume','music-status'])elements.set(id,element(id));
@@ -18,7 +18,7 @@ function player(){
 }
 const flush=()=>new Promise(resolve=>setImmediate(resolve));
 test('piano stays silent until requested, controls volume and stops on a second click',async()=>{
-  const p=player();assert.equal(p.calls(),0);assert.equal(p.music.paused,true);assert.equal(p.music.volume,.35);
+  const p=player();assert.equal(p.calls(),0);assert.equal(p.music.paused,true);assert.equal(p.music.volume,.2);
   p.click();await flush();assert.equal(p.music.paused,false);assert.equal(p.elements.get('music-toggle').attributes['aria-pressed'],'true');
   p.elements.get('music-volume').value='10';p.elements.get('music-volume').emit('input');assert.equal(p.music.volume,.1);
   p.click();assert.equal(p.music.paused,true);assert.equal(p.elements.get('music-toggle').attributes['aria-pressed'],'false');
