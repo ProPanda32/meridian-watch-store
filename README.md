@@ -22,7 +22,7 @@ The login flow is intentionally browser-based with public demo credentials. It i
 
 - Recovered full-width hero layout, centered brand header, collection search and navigation drawer.
 - Scroll-linked film zoom and title fade, followed by a subtle collection reveal.
-- Film playback controls, poster support, offscreen playback suspension and reduced-motion support, ready for the pending media assets.
+- Film playback controls, poster fallback, offscreen playback suspension and reduced-motion support.
 - Storefront product details, bag quantities, stock limits and demo checkout.
 - Orders shared between the storefront and admin dashboard in the same browser.
 - Automatic updates across open tabs, plus refresh when a page regains focus.
@@ -47,7 +47,7 @@ The live workspace, login API, database and real-order backend have been removed
 
 Run `node --test test/demo.test.mjs` for the data and checkout tests. These cover storefront-to-admin order persistence, order price snapshots, stock updates, invalid/unavailable items, duplicate items, latest-stock checks, failed-storage handling, imagery migration and catalogue copy migration. All six tests passed during recovery validation.
 
-`npm test` also runs `test/server.test.mjs`, which covers landing assets, HTTP metadata and video byte-range requests. The full suite currently fails with `ENOENT` because the video files are absent. The server tests also require the poster and WebM alternative; run the full suite again after all media assets are restored.
+`npm test` runs all 11 checkout and server tests, including landing assets, HTTP metadata, full video downloads, byte-range requests and the WebM alternative. All 11 tests passed after media integration.
 
 ## Files
 
@@ -67,15 +67,11 @@ The sample collection is **The Aurelia**, **The Selene** and **The Aster**. Exis
 
 Names and prices remain illustrative sample data.
 
-## Landing media — pending integration
+## Landing media
 
-The original `Landing Page video.mp4` has been supplied again, but it has not been added to this repository. The recovered page references these paths, which are currently absent:
+The supplied `Landing Page video.mp4` is bundled at its original 1916 × 1080 resolution as `assets/watches/landing-page-video.mp4` (H.264, fast-start metadata, approximately 5.1 MB) and `assets/watches/landing-page-video.webm` (VP9, approximately 4.2 MB). The browser loads one supported format. `assets/watches/landing-page-poster.webp` is a still from the film.
 
-- `assets/watches/landing-page-video.mp4`
-- `assets/watches/landing-page-video.webm`
-- `assets/watches/landing-page-poster.webp`
-
-Until those assets are restored, the hero film and poster are unavailable. Requests for the missing media can also cause the Node preview server to exit because its file reads are not guarded against missing assets. Video integration and validation remain pending; this recovery merge did not add or modify video assets.
+The film is silent. Playback starts muted when motion is allowed, pauses offscreen, and stays paused after a visitor pauses it. Reduced-motion visitors see the poster and can choose to play the film.
 
 ## Recovery status
 
