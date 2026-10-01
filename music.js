@@ -17,6 +17,7 @@
     clearTimeout(volumeTimer);
     if(!adjustingVolume) volumeTimer=setTimeout(hideVolume,3000);
   }
+  window.addEventListener('scroll',hideVolume,{passive:true});
   for(const event of ['pointerenter','pointermove','focusin','input']) controls.addEventListener(event,showVolume);
   controls.addEventListener('pointerdown',()=>{adjustingVolume=true;showVolume();});
   for(const event of ['pointerup','pointercancel']) document.addEventListener(event,()=>{

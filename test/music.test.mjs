@@ -14,8 +14,9 @@ function player({blocked=false}={}){
   music.pause=()=>{music.paused=true;music.emit('pause');};
   const events=new Map(),document={hidden:false,body:{classList:{add(){}}},getElementById:id=>elements.get(id),addEventListener:(name,fn)=>events.set(name,fn)};
   const timers=new Map();let timerId=0;
-  vm.runInNewContext(source,{document,setTimeout:fn=>{timers.set(++timerId,fn);return timerId;},clearTimeout:id=>timers.delete(id)});
-  return {elements,music,document,expire:()=>{for(const [id,fn] of [...timers]){timers.delete(id);fn();}},release:()=>events.get('pointerup')(),click:()=>elements.get('music-toggle').emit('click'),visibility:hidden=>{document.hidden=hidden;events.get('visibilitychange')();},calls:()=>calls,reject:()=>{reject=true;},allow:()=>{reject=false;},interact:()=>events.get('pointerdown')({type:'pointerdown',target:{closest:()=>false}})};
+  const windowEvents=new Map();
+  vm.runInNewContext(source,{document,window:{addEventListener:(name,fn)=>windowEvents.set(name,fn)},setTimeout:fn=>{timers.set(++timerId,fn);return timerId;},clearTimeout:id=>timers.delete(id)});
+  return {elements,music,document,scroll:()=>windowEvents.get('scroll')(),expire:()=>{for(const [id,fn] of [...timers]){timers.delete(id);fn();}},release:()=>events.get('pointerup')(),click:()=>elements.get('music-toggle').emit('click'),visibility:hidden=>{document.hidden=hidden;events.get('visibilitychange')();},calls:()=>calls,reject:()=>{reject=true;},allow:()=>{reject=false;},interact:()=>events.get('pointerdown')({type:'pointerdown',target:{closest:()=>false}})};
 }
 const flush=()=>new Promise(resolve=>setImmediate(resolve));
 test('music attempts playback by default at low volume and the icon can stop it',async()=>{
@@ -51,4 +52,11 @@ test('volume panel closes after inactivity, reopens on interaction and stays ope
   controls.emit('pointermove');assert.equal(controls.classList.contains('volume-open'),true);
   controls.emit('pointerdown');p.expire();assert.equal(controls.classList.contains('volume-open'),true);
   p.release();p.expire();assert.equal(controls.classList.contains('volume-open'),false);
+});
+
+
+test('scrolling immediately closes the music volume panel',()=>{
+  const p=player(),controls=p.elements.get('music-controls');
+  controls.emit('pointerenter');assert.equal(controls.classList.contains('volume-open'),true);
+  p.scroll();assert.equal(controls.classList.contains('volume-open'),false);
 });
