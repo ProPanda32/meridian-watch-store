@@ -20,6 +20,9 @@ The login flow is intentionally browser-based with public demo credentials. It i
 
 ## Included
 
+- Full-width watch film, centered brand header, collection search and navigation drawer.
+- Scroll-linked film zoom and title fade, followed by a subtle collection reveal.
+- Pause/play control, poster fallback, offscreen playback suspension and reduced-motion support.
 - Storefront product details, bag quantities, stock limits and demo checkout.
 - Orders shared between the storefront and admin dashboard in the same browser.
 - Automatic updates across open tabs, plus refresh when a page regains focus.
@@ -42,15 +45,17 @@ The live workspace, login API, database and real-order backend have been removed
 
 ## Checks
 
-Run `npm test`. Tests cover storefront-to-admin order persistence, order price snapshots, stock updates, invalid/unavailable items, duplicate items, latest-stock checks and failed-storage handling.
+Run `npm test`. Tests cover storefront-to-admin order persistence, order price snapshots, stock updates, invalid/unavailable items, duplicate items, latest-stock checks, failed-storage handling, landing assets and video byte-range requests.
 
 ## Files
 
-- `index.html`, `storefront.js`: storefront and demo checkout
+- `index.html`, `storefront.css`, `storefront.js`: storefront and demo checkout
+- `landing.js`: film playback, scroll effects, navigation and product search
 - `admin.html`, `admin.css`, `admin.js`: dashboard and demo login
 - `store.js`: shared browser-local data and order creation
 - `server.mjs`: optional static preview server
 - `test/demo.test.mjs`: shared checkout model tests
+- `test/server.test.mjs`: static assets and video streaming tests
 
 ## Watch imagery
 
@@ -59,3 +64,7 @@ Original AI-generated images from the **Create Watch Image** chat, bundled as op
 Existing browser data automatically replaces the original stock images and unedited style descriptions while preserving custom images, prices, stock, visibility and orders. Admin accepts HTTPS image URLs or bundled `assets/watches/*.webp` paths.
 
 Names and prices remain illustrative sample data.
+
+The supplied luxury watch film is bundled as `assets/watches/landing-page-video.webm` (VP9) and `landing-page-video.mp4` (H.264 with fast-start metadata), retaining its 1916 x 1080 resolution. The browser loads one supported format. `landing-page-poster.webp` is a frame from that film. The film is silent; the speaker indicator is informational, not a mute toggle. Playback starts muted when motion is allowed, pauses offscreen, and remains paused after a visitor pauses it. Reduced-motion visitors see the poster and can choose to play the film.
+
+Navigation and playback icons use Lucide geometry; its license is included in `assets/lucide-license.txt`.

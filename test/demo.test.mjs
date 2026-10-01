@@ -31,3 +31,15 @@ test('stock imagery migrates without losing browser orders or admin edits',()=>{
   assert.equal(migrated.products[1].image,'https://example.com/custom.webp');assert.equal(JSON.stringify(migrated.orders),JSON.stringify(state.orders));
   b.store.save(migrated);assert.equal(b.store.load().products[0].image,migrated.products[0].image);
 });
+test('catalogue copy updates old defaults while preserving custom text and order snapshots',()=>{
+  const b=browser(),state=b.store.load();
+  state.products[0].name='The Noir';
+  state.products[0].description='An engraved champagne-gold bracelet and a starry midnight dial with a moonphase-inspired detail. A celestial expression of understated luxury.';
+  state.products[1].name='My custom watch';state.products[1].description='My custom description';
+  state.orders[0].items[0].name='The Noir';
+  b.storage.set(b.store.key,JSON.stringify(state));
+  const updated=b.store.load();assert.equal(updated.products[0].name,'The Aurelia');assert.match(updated.products[0].description,/crescent-moon/);
+  assert.equal(updated.products[1].name,'My custom watch');assert.equal(updated.products[1].description,'My custom description');
+  assert.equal(updated.orders[0].items[0].name,'The Noir');
+  const order=b.store.createOrder({customer:'Test',email:'test@example.com',items:[{productId:'noir',quantity:1}]});assert.equal(order.items[0].name,'The Aurelia');
+});
