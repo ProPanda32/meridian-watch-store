@@ -8,7 +8,38 @@ const collectionGroups={
 };
 let selectedCollection='all';
 function collectionProducts(group){return state.products.filter(p=>p.active&&(group==='all'||collectionGroups[group].includes(p.id)));}
-function selectCollection(button){selectedCollection=button.dataset.collection;render();}
+let collectionAnimation,collectionTransition=0;
+const collectionMotion=window.matchMedia('(prefers-reduced-motion: reduce)');
+async function selectCollection(button){
+  if(button.dataset.collection===selectedCollection)return;
+  selectedCollection=button.dataset.collection;
+  const panel=$('products'),transition=++collectionTransition;
+  collectionAnimation?.cancel();
+  if(collectionMotion.matches||!panel.animate){
+    panel.inert=false;panel.classList.remove('is-switching');panel.removeAttribute('aria-busy');render();return;
+  }
+  const oldHeight=panel.getBoundingClientRect().height;
+  panel.inert=true;panel.classList.add('is-switching');panel.setAttribute('aria-busy','true');
+  try{
+    collectionAnimation=panel.animate([{opacity:1,transform:'translateY(0)'},{opacity:0,transform:'translateY(-6px)'}],{duration:120,easing:'ease-out',fill:'forwards'});
+    await collectionAnimation.finished;
+    if(transition!==collectionTransition)return;
+    render();
+    const newHeight=panel.getBoundingClientRect().height;
+    collectionAnimation.cancel();
+    collectionAnimation=panel.animate([
+      {opacity:0,transform:'translateY(8px)',height:oldHeight+'px'},
+      {opacity:1,transform:'translateY(0)',height:newHeight+'px'}
+    ],{duration:280,easing:'cubic-bezier(.2,.7,.3,1)',fill:'forwards'});
+    await collectionAnimation.finished;
+  }catch{/* A newer tab selection cancels the previous transition. */}
+  finally{
+    if(transition===collectionTransition){
+      collectionAnimation?.cancel();collectionAnimation=null;
+      panel.inert=false;panel.classList.remove('is-switching');panel.removeAttribute('aria-busy');
+    }
+  }
+}
 const collectionTabs=document.querySelector('.collection-tabs');
 collectionTabs.addEventListener('click',event=>{const button=event.target.closest('[data-collection]');if(button)selectCollection(button);});
 collectionTabs.addEventListener('keydown',event=>{

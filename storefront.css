@@ -165,3 +165,5 @@ dialog::backdrop{background:#0008}
 @media(max-width:600px){.collection-tabs{gap:2px;margin-bottom:24px}.collection-tabs button{padding:12px}}
 
 .sold-out-badge{background:#202522;color:var(--paper)}
+
+.products.is-switching{overflow:hidden;overflow-anchor:none;align-content:start}
