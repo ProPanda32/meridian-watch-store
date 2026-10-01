@@ -94,3 +94,7 @@ Visitors can turn on Chopin’s Prelude in A major, Op. 28 No. 7 using the fixed
 The composition is public domain. The recording is from craftonautJP’s Imperfect Piano Performances; its README dedicates the recordings under CC0, and its LICENSE includes the Unlicense public-domain dedication. See `assets/music/credits.txt` for sources and processing details.
 
 The piano recording is normalized to -26 LUFS, starts at 20% volume and fades gently in and out. This slower major-key prelude replaces the earlier waltz.
+
+## Header and wordmark
+
+The fixed header overlays the full-height hero with white navigation on a transparent background at the top. After scrolling it transitions to the storefront’s chalk-white background and dark navigation. The scroll-linked film animation starts at zero progress with the header overlay. The MERLOCK wordmark uses locally hosted Bodoni Moda, licensed under the SIL Open Font License (`assets/fonts/OFL.txt`).

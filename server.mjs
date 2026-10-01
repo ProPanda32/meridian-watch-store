@@ -6,6 +6,7 @@ const root=dirname(fileURLToPath(import.meta.url));
 const files={'/':'index.html','/index.html':'index.html','/admin.html':'admin.html','/admin':'admin.html','/store.js':'store.js','/storefront.js':'storefront.js','/storefront.css':'storefront.css','/landing.js':'landing.js','/music.js':'music.js','/assets/music/chopin-prelude-a-major.mp3':'assets/music/chopin-prelude-a-major.mp3','/admin.js':'admin.js','/admin.css':'admin.css','/assets/watches/landing-page-video.mp4':'assets/watches/landing-page-video.mp4'};
 for (const name of ['champagne-moonphase','midnight-moonphase','landing-page-poster','emerald-gold','blue-steel','obsidian-black','silver-blue','two-tone-gmt']) files['/assets/watches/'+name+'.webp']='assets/watches/'+name+'.webp';
 files['/assets/watches/landing-page-video.webm']='assets/watches/landing-page-video.webm';
+files['/assets/fonts/bodoni-moda.ttf']='assets/fonts/bodoni-moda.ttf';
 const port=Number(process.env.PORT||3000);
 export function createDemoServer(){return http.createServer((req,res)=>{
   const pathname=new URL(req.url,'http://localhost').pathname;
@@ -34,6 +35,7 @@ export function createDemoServer(){return http.createServer((req,res)=>{
     stream.on('error',()=>res.destroy());res.on('close',()=>stream.destroy());stream.pipe(res);return;
   }
   if(file.endsWith('.webp')) {res.writeHead(200,{'Content-Type':'image/webp','Cache-Control':'no-cache'});res.end(req.method==='HEAD'?undefined:readFileSync(join(root,file)));return;}
+  if(file.endsWith('.ttf')) {res.writeHead(200,{'Content-Type':'font/ttf','Cache-Control':'no-cache'});res.end(req.method==='HEAD'?undefined:readFileSync(join(root,file)));return;}
   const type=file.endsWith('.html')?'text/html':file.endsWith('.css')?'text/css':'text/javascript';
   res.writeHead(200,{'Content-Type':type+'; charset=utf-8','Cache-Control':'no-cache'});
   res.end(req.method==='HEAD'?undefined:readFileSync(join(root,file)));

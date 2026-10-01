@@ -55,7 +55,7 @@
   function updateScroll() {
     frame = 0;
     const travel = hero.offsetHeight - stage.offsetHeight;
-    const progress = motion.matches ? 0 : Math.min(1, Math.max(0, -hero.getBoundingClientRect().top + header.offsetHeight) / Math.max(1, travel));
+    const progress = motion.matches ? 0 : Math.min(1, Math.max(0, -hero.getBoundingClientRect().top) / Math.max(1, travel));
     const opacity = Math.max(0, 1 - progress * 1.3);
     hero.style.setProperty('--film-scale', String(1 + progress * .065));
     hero.style.setProperty('--copy-y', `${-progress * 40}px`);
