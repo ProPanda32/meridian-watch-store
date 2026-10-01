@@ -4,6 +4,31 @@
   const toggle=document.getElementById('music-toggle');
   const volume=document.getElementById('music-volume');
   const status=document.getElementById('music-status');
+  const volumePanel=controls.querySelector('.music-volume-panel');
+  let volumeTimer;
+  let adjustingVolume=false;
+  function hideVolume() {
+    if(volumePanel.contains(document.activeElement)) toggle.focus({preventScroll:true});
+    controls.classList.remove('volume-open');
+    clearTimeout(volumeTimer);
+  }
+  function showVolume() {
+    controls.classList.add('volume-open');
+    clearTimeout(volumeTimer);
+    if(!adjustingVolume) volumeTimer=setTimeout(hideVolume,3000);
+  }
+  for(const event of ['pointerenter','pointermove','focusin','input']) controls.addEventListener(event,showVolume);
+  controls.addEventListener('pointerdown',()=>{adjustingVolume=true;showVolume();});
+  for(const event of ['pointerup','pointercancel']) document.addEventListener(event,()=>{
+    if(!adjustingVolume)return;
+    adjustingVolume=false;showVolume();
+  });
+  controls.addEventListener('focusout',event=>{if(!controls.contains(event.relatedTarget))hideVolume();});
+  controls.addEventListener('keydown',event=>{
+    if(event.key==='Escape'){event.preventDefault();hideVolume();}
+    else showVolume();
+  });
+  document.addEventListener('pointerdown',event=>{if(!controls.contains(event.target))hideVolume();});
   let enabled=true;
   let retryOnInteraction=true;
   let attempt=0;
@@ -35,6 +60,7 @@
     render();
   }
   toggle.addEventListener('click',()=>{
+    showVolume();
     retryOnInteraction=false;
     enabled=!enabled;
     status.textContent='';
@@ -56,7 +82,7 @@
   document.addEventListener('pointerdown',retry);
   document.addEventListener('keydown',retry);
   document.addEventListener('visibilitychange',()=>{
-    if(document.hidden) {attempt++;music.pause();}
+    if(document.hidden) {attempt++;music.pause();adjustingVolume=false;hideVolume();}
     else if(enabled) void play();
   });
   render();

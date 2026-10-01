@@ -151,7 +151,7 @@ dialog::backdrop{background:#0008}
 .music-off-line{position:absolute;width:25px;height:1.5px;background:currentColor;transform:rotate(-45deg);box-shadow:0 0 2px var(--paper);pointer-events:none}
 .music-controls button[aria-pressed="true"] .music-off-line{display:none}
 .music-volume-panel{position:absolute;top:calc(100% + 8px);right:0;width:160px;padding:14px;background:var(--paper);color:var(--ink);border:1px solid var(--line);box-shadow:0 4px 16px #0002;visibility:hidden;opacity:0;transition:opacity .2s;text-shadow:none}
-.music-controls:hover .music-volume-panel,.music-controls:focus-within .music-volume-panel{visibility:visible;opacity:1}
+.music-controls.volume-open .music-volume-panel{visibility:visible;opacity:1}
 .music-volume-panel label{display:block;font-size:12px;margin-bottom:5px}
 .music-volume-panel input{width:100%;min-height:32px;accent-color:#202522;cursor:pointer}
 @media(max-width:360px){.header-start,.header-end{gap:4px}.site-header .nav-control{min-width:36px}.site-header .logo{font-size:20px;letter-spacing:.08em;max-width:120px}}

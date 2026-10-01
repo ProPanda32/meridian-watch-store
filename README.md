@@ -47,7 +47,7 @@ The live workspace, login API, database and real-order backend have been removed
 
 Run `node --test test/demo.test.mjs` for the data and checkout tests. These cover storefront-to-admin order persistence, order price snapshots, stock updates, invalid/unavailable items, duplicate items, latest-stock checks, failed-storage handling, imagery migration and catalogue copy migration. All six tests passed during recovery validation.
 
-`npm test` runs all 24 checkout, music-control and server tests, including landing assets, HTTP metadata, full video downloads, byte-range requests and the WebM alternative. All 24 tests pass, including removed-product migration and image-route removal.
+`npm test` runs all 25 checkout, music-control and server tests, including landing assets, HTTP metadata, full video downloads, byte-range requests and the WebM alternative. All 25 tests pass, including removed-product migration and image-route removal.
 
 ## Files
 
@@ -89,7 +89,7 @@ Returning browsers receive the five new listings once without changing existing 
 
 ## Background piano
 
-Chopin’s Prelude in A major, Op. 28 No. 7 attempts to start automatically at 20% volume. The header music-note button beside Our perspective toggles playback, and its volume panel appears on hover or keyboard focus. Browsers that block audible autoplay show the icon as off; music retries on the first interaction outside the control, or starts when the visitor clicks the icon. Turning music off prevents interaction-based retries. It loops independently of the silent hero video, pauses when the tab is hidden, and resumes while music remains enabled. Playback errors leave the control off with an accessible status message.
+Chopin’s Prelude in A major, Op. 28 No. 7 attempts to start automatically at 20% volume. The header music-note button beside Our perspective toggles playback, and its volume panel appears on interaction or keyboard focus and closes after three seconds of inactivity (while allowing uninterrupted dragging). Browsers that block audible autoplay show the icon as off; music retries on the first interaction outside the control, or starts when the visitor clicks the icon. Turning music off prevents interaction-based retries. It loops independently of the silent hero video, pauses when the tab is hidden, and resumes while music remains enabled. Playback errors leave the control off with an accessible status message.
 
 The composition is public domain. The recording is from craftonautJP’s Imperfect Piano Performances; its README dedicates the recordings under CC0, and its LICENSE includes the Unlicense public-domain dedication. See `assets/music/credits.txt` for sources and processing details.
 
