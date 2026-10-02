@@ -29,3 +29,10 @@ test('watch tabs exclude accessories and recommendations omit sold out hidden an
  assert.deepEqual(shop.recommendations(all,new Map([['noir',1],['strap',1]])).map(p=>p.id),['care']);
  assert.deepEqual(shop.recommendations(all,new Map([['strap',1]])),[]);
 });
+
+test('midnight strap suggestions are limited to visual pairings with Argent and Luna',()=>{
+ const watches=[{id:'noir',active:true},{id:'silver-blue',active:true},{id:'navy-moonphase',active:true}],strap={id:'accessory-leather-strap',category:'accessory',active:true,stock:2},care={id:'accessory-care-kit',category:'accessory',active:true,stock:2},catalogue=[...watches,strap,care];
+ assert.deepEqual(shop.recommendations(catalogue,new Map([['noir',1]])).map(p=>p.id),['accessory-care-kit']);
+ for(const id of ['silver-blue','navy-moonphase'])assert.deepEqual(shop.recommendations(catalogue,new Map([[id,1]])).map(p=>p.id),['accessory-leather-strap','accessory-care-kit']);
+ assert.deepEqual(shop.recommendations(catalogue,new Map([['silver-blue',1],['accessory-leather-strap',1]])).map(p=>p.id),['accessory-care-kit']);
+});

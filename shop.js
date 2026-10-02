@@ -15,7 +15,7 @@
     return {colour:p[0],strap:p[1],theme:p[2],size:`${p[3]} mm`,movement:p[4],water:'3 ATM (illustrative)',caseMaterial:/gold/i.test(product.style)?'Gold-tone finish':'Silver or dark-tone finish'};
   }
   function collection(products,group,groups={}){return products.filter(p=>p.active&&(group==='accessories'?p.category==='accessory':p.category!=='accessory'&&(group==='all'||(groups[group]||[]).includes(p.id))));}
-  function recommendations(products,bag){return [...bag.keys()].some(id=>products.some(p=>p.id===id&&p.category!=='accessory'))?products.filter(p=>p.active&&p.category==='accessory'&&p.stock>0&&!bag.has(p.id)).slice(0,3):[];}
+  function recommendations(products,bag){return [...bag.keys()].some(id=>products.some(p=>p.id===id&&p.category!=='accessory'))?products.filter(p=>p.active&&p.category==='accessory'&&p.stock>0&&!bag.has(p.id)&&(p.id!=='accessory-leather-strap'||['silver-blue','navy-moonphase'].some(id=>bag.has(id)))).slice(0,3):[];}
   function reviews(product){
     const names=['Jamie L.','Taylor R.'];
     return [{name:names[0],rating:5,title:'A considered finishing touch',text:`The ${details(product).colour.toLowerCase()} dial brings just the right amount of character to this design.`},{name:names[1],rating:4,title:'Easy to style',text:'A versatile look that works with both relaxed outfits and a smarter wardrobe.'}];

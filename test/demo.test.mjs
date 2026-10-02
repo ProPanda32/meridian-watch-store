@@ -221,3 +221,11 @@ test('mixed watch and accessory orders snapshot prices and update stock together
  const edited=b.store.load();edited.products.find(p=>p.id==='accessory-care-kit').stock=0;b.store.save(edited);assert.throws(()=>b.store.createOrder({customer:'Demo',email:'demo@example.com',items:[{productId:'accessory-care-kit',quantity:1}]}),/insufficient stock/);
  assert.equal(initial.products.filter(p=>p.category==='accessory').length,3);
 });
+
+test('midnight strap replaces the original listing while preserving edits stock and order history',()=>{
+ const b=browser(),state=b.store.load(),strap=state.products.find(p=>p.id==='accessory-leather-strap');
+ strap.name='Espresso Leather Strap';strap.style='Espresso leather · Silver-tone buckle';strap.image='assets/watches/accessory-leather-strap.webp';strap.description='A dark espresso leather strap with fine stitching and a silver-tone buckle. Check the lug width and attachment type of your watch before selecting a replacement strap.';strap.stock=7;strap.price=110;
+ const history=JSON.stringify(state.orders);b.store.save(state);const updated=b.store.load(),replacement=updated.products.find(p=>p.id===strap.id);
+ assert.equal(replacement.name,'Midnight Leather Strap');assert.equal(replacement.image,'assets/watches/accessory-midnight-strap.webp');assert.equal(replacement.stock,7);assert.equal(replacement.price,110);assert.equal(JSON.stringify(updated.orders),history);
+ replacement.name='Owner strap';replacement.image='https://example.com/strap.webp';b.store.save(updated);assert.equal(b.store.load().products.find(p=>p.id===strap.id).name,'Owner strap');assert.equal(b.store.load().products.find(p=>p.id===strap.id).image,replacement.image);
+});
