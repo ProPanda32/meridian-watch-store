@@ -89,12 +89,12 @@ test('dress and sport collection updates returning browsers without duplicating 
   old.products[0].name='Owner name';old.products[0].stock=4;old.products[0].price=250;
   const orders=JSON.stringify(old.orders);
   b.storage.set(b.store.key,JSON.stringify(old));
-  const updated=b.store.load();assert.equal(updated.products.length,12);
+  const updated=b.store.load();assert.equal(updated.products.length,15);
   assert.equal(updated.products[0].name,'Owner name');assert.equal(updated.products[0].stock,4);assert.equal(updated.products[0].price,250);
   assert.equal(JSON.stringify(updated.orders),orders);
   updated.products.find(p=>p.id==='gold-rectangle').price=300;
   updated.products=updated.products.filter(p=>p.id!=='navy-moonphase');b.store.save(updated);
-  const saved=b.store.load();assert.equal(saved.products.length,11);
+  const saved=b.store.load();assert.equal(saved.products.length,14);
   assert.equal(saved.products.find(p=>p.id==='gold-rectangle').price,300);
   assert.equal(saved.products.some(p=>p.id==='navy-moonphase'),false);
 });
@@ -181,7 +181,7 @@ test('premium prices migrate old defaults and preserve custom prices and histori
  assert.equal(updated.products.find(p=>p.id==='noir').price,1850);
  assert.equal(updated.products.find(p=>p.id==='silver').price,777);
  assert.equal(JSON.stringify(updated.orders),orders);
- assert.ok(browser().store.load().products.every(p=>p.price>=1250&&p.price<=2450));
+ assert.ok(browser().store.load().products.filter(p=>p.category!=='accessory').every(p=>p.price>=1250&&p.price<=2450));
 });
 
 test('delivery checkout records address and postage with discounts only on watches',()=>{
@@ -207,4 +207,17 @@ test('previous delivery rates remain valid without changing saved totals',()=>{
  assert.equal(b.store.orderTotal(b.store.load().orders[0]),1856);
  state.orders[0].delivery.method='express';state.orders[0].shippingFee=15;b.store.save(state);
  assert.equal(b.store.orderTotal(b.store.load().orders[0]),1865);
+});
+
+test('accessories migrate once without replacing edits or restoring removed products',()=>{
+ const b=browser(),old=b.store.load();old.products=old.products.filter(p=>p.category!=='accessory');delete old.accessoriesAdded;old.products[0].stock=2;const orders=JSON.stringify(old.orders);b.store.save(old);
+ const migrated=b.store.load();assert.equal(migrated.products.filter(p=>p.category==='accessory').length,3);assert.equal(migrated.products[0].stock,2);assert.equal(JSON.stringify(migrated.orders),orders);
+ migrated.products.find(p=>p.id==='accessory-care-kit').price=40;migrated.products=migrated.products.filter(p=>p.id!=='accessory-watch-case');b.store.save(migrated);
+ const saved=b.store.load();assert.equal(saved.products.find(p=>p.id==='accessory-care-kit').price,40);assert.equal(saved.products.some(p=>p.id==='accessory-watch-case'),false);
+});
+test('mixed watch and accessory orders snapshot prices and update stock together',()=>{
+ const b=browser(),initial=b.store.load();const order=b.store.createOrder({customer:'Demo',email:'demo@example.com',items:[{productId:'noir',quantity:1},{productId:'accessory-care-kit',quantity:2}]});
+ assert.equal(b.store.orderTotal(order),1920);assert.equal(order.items[1].unitPrice,35);assert.equal(b.store.load().products.find(p=>p.id==='accessory-care-kit').stock,23);
+ const edited=b.store.load();edited.products.find(p=>p.id==='accessory-care-kit').stock=0;b.store.save(edited);assert.throws(()=>b.store.createOrder({customer:'Demo',email:'demo@example.com',items:[{productId:'accessory-care-kit',quantity:1}]}),/insufficient stock/);
+ assert.equal(initial.products.filter(p=>p.category==='accessory').length,3);
 });

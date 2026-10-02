@@ -13,12 +13,13 @@ const collectionGroups={
   statement:['emerald-gold','obsidian-black','black-skeleton']
 };
 let selectedCollection='all';
-function collectionProducts(group){return state.products.filter(p=>p.active&&(group==='all'||collectionGroups[group].includes(p.id)));}
+function collectionProducts(group){return shop.collection(state.products,group,collectionGroups);}
 let collectionAnimation,collectionTransition=0;
 const collectionMotion=window.matchMedia('(prefers-reduced-motion: reduce)');
 async function selectCollection(button){
   if(button.dataset.collection===selectedCollection)return;
   selectedCollection=button.dataset.collection;
+  if(selectedCollection==='accessories'){for(const name of ['colour','strap'])$('collection-filters').elements[name].value='';}
   const panel=$('products'),transition=++collectionTransition;
   collectionAnimation?.cancel();
   if(collectionMotion.matches||!panel.animate){
@@ -68,18 +69,23 @@ function render(){state=store.load();document.title=state.settings.name+' | Time
     button.setAttribute('aria-selected',String(selected));button.tabIndex=selected?0:-1;
     button.querySelector('[data-collection-count]').textContent=collectionProducts(button.dataset.collection).length;
   }
+  const accessoryView=selectedCollection==='accessories';
+  for(const name of ['colour','strap'])$('collection-filters').elements[name].closest('label').hidden=accessoryView;
+  $('collection-filters').elements.query.placeholder=accessoryView?'Name or material':'Name, colour or dial';
+  $('collection-search-label').textContent=accessoryView?'Find an accessory':'Find a watch';
+  const singular=accessoryView?'accessory':'watch',plural=accessoryView?'accessories':'watches';
   const filters=Object.fromEntries(new FormData($('collection-filters')));
   const activeCount=Object.entries(filters).filter(([key,value])=>value&&(key!=='sort'||value!=='featured')).length;
   $('filter-active-count').hidden=!activeCount;
   $('filter-active-count').textContent=`${activeCount} active`;
   const visibleProducts=shop.filter(collectionProducts(selectedCollection),filters,state.orders);
   $('products').setAttribute('aria-labelledby','collection-tab-'+selectedCollection);
-  $('collection-status').textContent=`Showing ${visibleProducts.length} ${visibleProducts.length===1?'watch':'watches'}.`;
-  $('collection-results').textContent=`${visibleProducts.length} ${visibleProducts.length===1?'watch':'watches'} in this view`;
+  $('collection-status').textContent=`Showing ${visibleProducts.length} ${visibleProducts.length===1?singular:plural}.`;
+  $('collection-results').textContent=`${visibleProducts.length} ${visibleProducts.length===1?singular:plural} in this view`;
   const collectionSignature=JSON.stringify([selectedCollection,visibleProducts]);
   if(collectionSignature!==renderedCollection){
   renderedCollection=collectionSignature;
-  $('products').innerHTML=visibleProducts.map(p=>`<article><div class="product-image"><img src="${esc(p.image)}" alt="${esc(p.style)} watch" loading="lazy"><button class="wish-button" type="button" data-wish="${p.id}" aria-label="Save ${esc(p.name)}" aria-pressed="${wishlist.has(p.id)}"><svg class="icon" aria-hidden="true"><use href="#icon-heart"/></svg></button><span class="badge${p.stock===0?' sold-out-badge':''}">${p.stock===0?'Sold out':esc(p.badge)}</span></div><div class="product-info"><div><h3>${esc(p.name)}</h3><p>${esc(p.style)}</p></div><span class="price">${money(p.price)}</span></div><div class="product-actions"><button data-details="${p.id}">View details</button>${bagStepper(p)}</div><div class="card-extras"><span class="sample-rating" aria-label="Sample rating 4.5 out of 5">★ 4.5 <small>Sample reviews</small></span><label><input type="checkbox" data-compare="${p.id}" ${comparison.has(p.id)?'checked':''}> Compare</label></div></article>`).join('')||'<div class="empty-collection"><p>No watches match these filters.</p><button class="outline-button" type="button" id="empty-reset">Clear filters</button></div>';
+  $('products').innerHTML=visibleProducts.map(p=>`<article><div class="product-image"><img src="${esc(p.image)}" alt="${esc(p.name)} — ${esc(p.style)}" loading="lazy">${p.category==='accessory'?'':`<button class="wish-button" type="button" data-wish="${p.id}" aria-label="Save ${esc(p.name)}" aria-pressed="${wishlist.has(p.id)}"><svg class="icon" aria-hidden="true"><use href="#icon-heart"/></svg></button>`}<span class="badge${p.stock===0?' sold-out-badge':''}">${p.stock===0?'Sold out':esc(p.badge)}</span></div><div class="product-info"><div><h3>${esc(p.name)}</h3><p>${esc(p.style)}</p></div><span class="price">${money(p.price)}</span></div><div class="product-actions"><button data-details="${p.id}">View details</button>${bagStepper(p)}</div>${p.category==='accessory'?'':`<div class="card-extras"><span class="sample-rating" aria-label="Sample rating 4.5 out of 5">★ 4.5 <small>Sample reviews</small></span><label><input type="checkbox" data-compare="${p.id}" ${comparison.has(p.id)?'checked':''}> Compare</label></div>`}</article>`).join('')||'<div class="empty-collection"><p>No products match these filters.</p><button class="outline-button" type="button" id="empty-reset">Clear filters</button></div>';
   }
   syncShoppingTools();renderWishlist();
   renderBag();
@@ -157,7 +163,7 @@ function renderBag(){
   if($('checkout-dialog').open)renderCheckout();
   syncBagIndicators();syncDetailsStock();
 }
-function addToBag(id){state=store.load();const p=state.products.find(p=>p.id===id);if(!p||!p.active)throw Error('Unknown product');if(p.stock===0){render();toast('This watch is sold out');return {error:'Insufficient stock'};}if((bag.get(id)||0)>=p.stock){toast('No more stock available');return {error:'Insufficient stock'};}bag.set(id,(bag.get(id)||0)+1);renderBag();toast('Added to your bag');return {product:id,quantity:bag.get(id),totalItems:[...bag.values()].reduce((a,b)=>a+b,0)};}
+function addToBag(id){state=store.load();const p=state.products.find(p=>p.id===id);if(!p||!p.active)throw Error('Unknown product');if(p.stock===0){render();toast('This product is sold out');return {error:'Insufficient stock'};}if((bag.get(id)||0)>=p.stock){toast('No more stock available');return {error:'Insufficient stock'};}bag.set(id,(bag.get(id)||0)+1);renderBag();toast('Added to your bag');return {product:id,quantity:bag.get(id),totalItems:[...bag.values()].reduce((a,b)=>a+b,0)};}
 function syncDetailsStock(){
   if(!detailProductId)return;
   const product=state.products.find(p=>p.id===detailProductId&&p.active);
@@ -170,14 +176,18 @@ function syncDetailsStock(){
 function showDetails(id){
   state=store.load();const p=state.products.find(p=>p.id===id&&p.active);if(!p)return;
   for(const modal of ['wishlist-dialog','compare-dialog','search-dialog'])if($(modal).open)$(modal).close();
-  const img=$('detail-img');img.src=p.image;img.alt=p.style+' watch';
+  const img=$('detail-img');img.src=p.image;img.alt=p.name+' — '+p.style;
   $('detail-title').textContent=p.name;$('detail-copy').textContent=p.description+' '+money(p.price);
   detailProductId=id;$('detail-wish').dataset.wish=id;
+  $('detail-wish').hidden=p.category==='accessory';
+  document.querySelector('[data-gallery=full]').textContent=p.category==='accessory'?'Full product':'Full watch';
+  document.querySelector('[data-gallery=dial]').hidden=p.category==='accessory';
   $('extra-gallery').innerHTML=(p.galleryImages||[]).map((url,index)=>`<button type="button" data-photo="${index}" aria-label="Show additional photo ${index+1}" aria-pressed="false"><img src="${esc(url)}" alt="Additional view ${index+1} of ${esc(p.name)}"></button>`).join('');
   setGallery('full');$('detail-zoom').classList.remove('is-zoomed');$('detail-zoom').setAttribute('aria-pressed','false');
   const d=shop.details(p);
   $('detail-specs').innerHTML=`<h3>Design details</h3><p class="preview-note">Illustrative specifications, not verified technical specifications.</p><dl class="watch-specs">${[['Dial colour',d.colour],['Strap',d.strap],['Case size',d.size],['Movement',d.movement],['Finish',d.caseMaterial],['Water resistance',d.water]].map(([label,value])=>`<div><dt>${label}</dt><dd>${esc(value)}</dd></div>`).join('')}</dl>`;
   $('detail-reviews').innerHTML=`<h3>Sample reviews</h3><p class="preview-note">4.5 / 5 · Two fictional reviews to demonstrate the experience.</p>${shop.reviews(p).map(r=>`<article class="review-card"><div><strong>${esc(r.name)}</strong><span aria-label="${r.rating} out of 5">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</span></div><h4>${esc(r.title)}</h4><p>${esc(r.text)}</p><small>Sample review · Not a real customer</small></article>`).join('')}`;
+  if(p.category==='accessory'){$('detail-specs').innerHTML='<h3>Care and compatibility</h3><p>Check dimensions and compatibility with your watch before choosing an accessory. Follow the manufacturer’s guidance for fitting and care.</p>';$('detail-reviews').innerHTML='';}
   syncDetailsStock();syncShoppingTools();if(!$('details-dialog').open)$('details-dialog').showModal();
 }
 function openBag(){for(const modal of ['wishlist-dialog','compare-dialog','details-dialog'])if($(modal).open)$(modal).close();render();$('bag-dialog').showModal();}
@@ -189,7 +199,14 @@ function renderDiscount(){
   $('bag-total').textContent=money(totals.total);
   $('discount-status').textContent=discountCode?`${discountCode} applied. You save ${money(totals.discount)}.`:'Try WELCOME10 (10%) or MERLOCK15 (15%).';
 }
+let accessorySuggestionSignature;
+function renderAccessorySuggestions(){
+  const products=shop.recommendations(state.products,bag),signature=JSON.stringify(products);
+  $('checkout-accessories').hidden=!products.length;
+  if(signature!==accessorySuggestionSignature){accessorySuggestionSignature=signature;$('checkout-accessory-items').innerHTML=products.map(p=>`<article class="checkout-accessory"><img src="${esc(p.image)}" alt="${esc(p.name)}" width="64" height="64"><div><h4>${esc(p.name)}</h4><p>${money(p.price)}</p></div><button class="outline-button" type="button" data-add="${p.id}" aria-label="Add ${esc(p.name)} to bag">Add</button></article>`).join('');}
+}
 function renderCheckout(){
+  renderAccessorySuggestions();
   const totals=bagQuote(),shipping=store.deliveryMethods[$('checkout-form').elements.deliveryMethod.value];$('checkout-summary').innerHTML=bagItems().map(({product:p,quantity:q})=>`<p>${esc(p.name)} × ${q} — ${money(p.price*q)}</p>`).join('')+`<div class="summary-line"><span>Subtotal</span><span>${money(totals.subtotal)}</span></div>${discountCode?`<div class="summary-line"><span>${esc(discountCode)}</span><span>−${money(totals.discount)}</span></div>`:''}<div class="summary-line"><span>${esc(shipping.label)}</span><span>${money(shipping.fee)}</span></div><div class="total"><strong>Total</strong><strong>${money(totals.total+shipping.fee)}</strong></div>`;$('place-order').disabled=!bag.size;
 }
 function startCheckout(){render();if(!bag.size)return;$('bag-dialog').close();$('checkout-error').textContent='';renderCheckout();$('checkout-dialog').showModal();}

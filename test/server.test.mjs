@@ -93,3 +93,10 @@ test('distinct background images serve the exact bundled watch assets',async()=>
   assert.deepEqual(Buffer.from(await response.arrayBuffer()),readFileSync(new URL('../'+path,import.meta.url)));
  }
 });
+
+test('accessory product images serve their exact bundled photos',async()=>{
+ for(const name of ['accessory-leather-strap','accessory-watch-case','accessory-care-kit']){
+  const response=await fetch(base+'/assets/watches/'+name+'.webp');assert.equal(response.status,200);assert.equal(response.headers.get('content-type'),'image/webp');
+  assert.deepEqual(Buffer.from(await response.arrayBuffer()),readFileSync(new URL('../assets/watches/'+name+'.webp',import.meta.url)));
+ }
+});
