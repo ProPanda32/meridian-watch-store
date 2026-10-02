@@ -6,6 +6,7 @@ const root=dirname(fileURLToPath(import.meta.url));
 const files={'/':'index.html','/index.html':'index.html','/admin.html':'admin.html','/admin':'admin.html','/store.js':'store.js','/shop.js':'shop.js','/storefront.js':'storefront.js','/storefront.css':'storefront.css','/landing.js':'landing.js','/music.js':'music.js','/assets/music/chopin-prelude-a-major.mp3':'assets/music/chopin-prelude-a-major.mp3','/analytics.js':'analytics.js','/admin.js':'admin.js','/admin.css':'admin.css','/assets/watches/landing-page-video.mp4':'assets/watches/landing-page-video.mp4'};
 for (const name of ['champagne-moonphase','midnight-moonphase','landing-page-poster','emerald-gold','blue-steel','obsidian-black','silver-blue','two-tone-gmt','gold-rectangle','navy-moonphase','green-chronograph','pearl-two-tone','black-skeleton']) files['/assets/watches/'+name+'.webp']='assets/watches/'+name+'.webp';
 for(const name of ["emerald-gold-elegant-bg", "blue-steel-elegant-bg", "obsidian-black-elegant-bg", "silver-blue-elegant-bg", "two-tone-gmt-elegant-bg", "gold-rectangle-elegant-bg", "navy-moonphase-elegant-bg", "green-chronograph-elegant-bg", "pearl-two-tone-elegant-bg", "black-skeleton-elegant-bg"]) files['/assets/watches/'+name+'.webp']='assets/watches/'+name+'.webp';
+for(const name of ['accessory-leather-strap','accessory-watch-case','accessory-care-kit'])files['/assets/watches/'+name+'.webp']='assets/watches/'+name+'.webp';
 files['/assets/watches/landing-page-video.webm']='assets/watches/landing-page-video.webm';
 files['/assets/fonts/bodoni-moda.ttf']='assets/fonts/bodoni-moda.ttf';
 for(const name of ['champagne-moonphase','midnight-moonphase','emerald-gold-elegant-bg','blue-steel-elegant-bg','obsidian-black-elegant-bg','silver-blue-elegant-bg','two-tone-gmt-elegant-bg','gold-rectangle-elegant-bg','navy-moonphase-elegant-bg','green-chronograph-elegant-bg','pearl-two-tone-elegant-bg','black-skeleton-elegant-bg'])files['/assets/watches/'+name+'-empty.webp']='assets/watches/'+name+'-empty.webp';
@@ -44,3 +45,4 @@ export function createDemoServer(){return http.createServer((req,res)=>{
   res.end(req.method==='HEAD'?undefined:readFileSync(join(root,file)));
 });}
 if(process.argv[1]&&fileURLToPath(import.meta.url)===resolve(process.argv[1]))createDemoServer().listen(port,process.env.HOST||'127.0.0.1',()=>console.log('Merlock demo ready at http://localhost:'+port));
+

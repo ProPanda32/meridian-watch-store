@@ -85,3 +85,4 @@ test('watch fade waits for all image layers instead of finishing before a slow p
   p.pictures[2].emit('load');
   await flush();assert.ok(card.classList.contains('watch-ready'));
 });
+

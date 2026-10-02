@@ -214,3 +214,4 @@
     window.showDetails(result.dataset.searchProduct);
   });
 })();
+

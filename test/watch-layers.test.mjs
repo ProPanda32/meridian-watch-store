@@ -29,6 +29,8 @@ test('custom and changed product photos retain their original image without an u
     assert.equal((html.match(/<img/g)||[]).length,1);
     assert.ok(!html.includes('watch-backdrop'));
   }
+  const accessory=context.renderWatch({name:'Leather strap',style:'Espresso leather',image:'assets/watches/accessory-leather-strap.webp'});
+  assert.ok(accessory.includes('alt="Leather strap — Espresso leather"'));
 });
 test('the scenery mask has original photo proportions and a transparent opening around the watch',()=>{
   for(const [name,[width,height,points]] of Object.entries(context.layers)){

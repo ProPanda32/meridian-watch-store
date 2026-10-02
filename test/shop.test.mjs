@@ -20,3 +20,12 @@ test('corrupt or unavailable browser storage falls back gracefully',()=>{
  assert.deepEqual(shop.read({getItem:()=>'{bad'},'bag',[]),[]);
  assert.deepEqual(shop.read({getItem(){throw Error('blocked');}},'bag',[]),[]);
 });
+
+test('watch tabs exclude accessories and recommendations omit sold out hidden and bagged extras',()=>{
+ const extras=[{id:'strap',category:'accessory',active:true,stock:2},{id:'case',category:'accessory',active:true,stock:0},{id:'care',category:'accessory',active:true,stock:4},{id:'hidden-extra',category:'accessory',active:false,stock:5}],all=[...products,...extras];
+ assert.deepEqual(shop.collection(all,'all').map(p=>p.id),['noir','silver-blue','emerald-gold']);
+ assert.deepEqual(shop.collection(all,'accessories').map(p=>p.id),['strap','case','care']);
+ assert.deepEqual(shop.collection(all,'celestial',{celestial:['noir','strap']}).map(p=>p.id),['noir']);
+ assert.deepEqual(shop.recommendations(all,new Map([['noir',1],['strap',1]])).map(p=>p.id),['care']);
+ assert.deepEqual(shop.recommendations(all,new Map([['strap',1]])),[]);
+});

@@ -148,6 +148,8 @@ Watches 3–12 use a restrained palette of warm charcoal, muted slate, graphite,
 
 Checkout collects fictional delivery addresses and optional instructions, with normal (£15, 3–5 working days) or express (£30, 1–2 working days) delivery. Postage is added after watch discounts and saved with the order. Card and digital-wallet options are simulated; no card information is collected or payment processed. Admin order details show the address, instructions, delivery method, postage and demo payment method. Legacy orders retain their totals; sales analysis excludes postage.
 
+The Accessories tab contains an espresso leather strap (£95), single-watch travel case (£125) and watch care kit (£35), with individual AI-generated product images. Accessories are excluded from All watches and the four watch themes. Available accessories are suggested at checkout when the bag contains a watch; sold-out, hidden and already-added accessories are omitted. They share stock validation, quantity controls, discounts, checkout and admin management with watches. The product editor includes a Watch/Accessory type selector, and existing catalogues receive the accessories once without overwriting edits or restoring removed products.
+
 
 
 ## Watch background dissolve
@@ -155,4 +157,5 @@ Checkout collects fictional delivery addresses and optional instructions, with n
 Each of the 12 bundled watch photos has a separate `assets/watches/*-empty.webp` background plate. The background is visible immediately, while the original watch photo dissolves in over 1.65 seconds on scrolling into view. An SVG scenery mask retains the original pixels around the watch throughout the reveal. Watch names and prices follow with a short delay. The original product photos are preserved; custom admin image URLs use the ordinary photo fade. Reduced-motion preferences show the complete product immediately.
 
 Background plates were created with the built-in image-generation tool, then encoded as WebP in the original photo proportions. Prompt: remove the entire watch, bracelet or strap, crown, pushers, and cast shadow or reflection; seamlessly continue the existing backdrop through the vacated area; preserve the exact framing, lighting, colour grading, camera and exterior scenery; add no watch, jewellery, logo, text or objects. The Aurelia prompt specifically retains the dark silk, champagne-gold light ribbons and star-like particles.
+
 
