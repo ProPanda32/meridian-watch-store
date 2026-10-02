@@ -158,7 +158,7 @@ test('product galleries accept extra photos and preserve them across store saves
 });
 
 test('background colours update old catalogue images without changing watches or saved store data',()=>{
- const b=browser(),state=b.store.load();const oldImages=JSON.parse(readFileSync(new URL('../sources/background-masks/manifest.json',import.meta.url),'utf8'));
+ const b=browser(),state=b.store.load();const oldImages=JSON.parse(readFileSync(new URL('../sources/watch-backgrounds.json',import.meta.url),'utf8'));
  for(const product of state.products){const entry=Object.entries(oldImages).find(([,current])=>current===product.image);if(entry)product.image=entry[0];}
  const target=state.products.find(p=>p.id==='emerald-gold');target.stock=3;target.price=199;
  const custom=state.products.find(p=>p.id==='blue-steel');custom.image='https://example.com/custom-watch.webp';
@@ -167,4 +167,8 @@ test('background colours update old catalogue images without changing watches or
  assert.equal(saved.products.find(p=>p.id==='emerald-gold').stock,3);assert.equal(saved.products.find(p=>p.id==='emerald-gold').price,199);
  assert.equal(saved.products.find(p=>p.id==='blue-steel').image,custom.image);assert.equal(JSON.stringify(saved.orders),orders);
  assert.deepEqual(saved.products.slice(0,2).map(p=>p.image),firstTwo);
+ for(const product of saved.products){if(Object.values(oldImages).includes(product.image))product.image=product.image.replace('-clean-bg.webp','-bg.webp');}
+ b.store.save(saved);const cleaned=b.store.load();
+ for(const product of cleaned.products){const expected=oldImages['assets/watches/'+product.id+'.webp'];if(expected&&product.id!=='blue-steel')assert.equal(product.image,expected);}
+ assert.equal(cleaned.products.find(p=>p.id==='blue-steel').image,custom.image);
 });

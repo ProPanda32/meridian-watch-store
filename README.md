@@ -142,6 +142,6 @@ Settings → Reset demo restores the twelve-watch catalogue, original stocks, sa
 
 ## Distinct watch backgrounds
 
-Watches 3–12 now use green, ocean-blue, violet, icy-blue, copper, burgundy, indigo, teal, blush and graphite backgrounds. ImageGen edits the background scene; the original watch is then restored through the protection masks in `sources/background-masks/`. Lossless WebP output retains the original image dimensions and protected watch pixels. The original images remain available for reference and existing gallery links. Aurelia and Selene are unchanged.
+Watches 3–12 now use green, ocean-blue, violet, icy-blue, copper, burgundy, indigo, teal, blush and graphite backgrounds. The clean ImageGen edits are resized to the original image dimensions and saved as WebP. These replace the earlier masked composites, removing the gold outlines around the watches. `sources/watch-backgrounds.json` records the image mapping; saved product references migrate to the clean images. The original images remain available for reference and existing gallery links. Aurelia and Selene are unchanged.
 
 `manifest.json` maps the previous bundled images to the new assets. Returning browsers update those default image paths while preserving custom image URLs, product edits and order history. New asset names avoid displaying a cached version of the previous background.
