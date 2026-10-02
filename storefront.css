@@ -172,7 +172,7 @@ dialog::backdrop{background:#0008}
 .music-volume-panel input{width:100%;min-height:32px;accent-color:#202522;cursor:pointer}
 @media(max-width:360px){.header-start,.header-end{gap:4px}.site-header .nav-control{min-width:36px}.site-header .logo{font-size:20px;letter-spacing:.08em;max-width:120px}}
 
-.collection-tabs{display:flex;gap:10px;overflow-x:auto;max-width:100%;margin:0 0 30px;border-bottom:1px solid var(--line);scrollbar-width:thin}
+.collection-tabs{display:flex;flex-wrap:wrap;gap:10px;overflow:visible;max-width:100%;margin:0 0 30px;border-bottom:1px solid var(--line)}
 .collection-tabs button{display:flex;align-items:center;gap:9px;flex-shrink:0;min-height:48px;padding:12px 18px;border:0;border-bottom:2px solid transparent;background:transparent;color:#666b63;font-size:14px;white-space:nowrap}
 .collection-tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--ink);font-weight:600}
 .collection-tabs button:hover{color:var(--ink)}
