@@ -51,3 +51,12 @@
   .login-screen{padding:24px 16px}
   .login-screen h1{font-size:30px}
 }
+
+.stock-tag{display:inline-block;padding:4px 8px;margin-top:8px;border-radius:3px;font-size:12px;font-weight:600;line-height:1.4}
+.stock-empty{background:#f8dfdf;color:#8a2525}
+.stock-low{background:#f5e8c8;color:#71520f}
+.stock-row .stock-tag{margin-top:0;margin-right:6px}
+.stock-link{border:0;background:none;padding:6px 0;text-align:left;text-decoration:underline;text-underline-offset:3px;color:inherit;min-height:44px;overflow-wrap:anywhere}
+.product-editor-actions{display:flex;gap:12px;flex-wrap:wrap}
+.danger-button{border:1px solid #a02222;background:transparent;color:#a02222;padding:12px 18px;border-radius:3px;min-height:44px}
+@media(max-width:600px){.product-editor-actions{flex-direction:column}.product-editor-actions button{width:100%}.stock-row>span{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.stock-row .stock-tag{margin:0}}
