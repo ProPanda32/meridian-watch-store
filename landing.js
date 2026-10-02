@@ -73,11 +73,8 @@
       hero.style.setProperty('--copy-opacity', String(opacity));
     }
     copy.inert = opacity < .05;
-    // Tie the header directly to scroll distance so reversing direction never
-    // restarts a timed transition at a threshold.
-    const headerProgress = Math.min(1, Math.max(0, window.scrollY) / 140);
-    const headerBlend = motion.matches ? Number(window.scrollY > 8) : headerProgress * headerProgress * (3 - 2 * headerProgress);
-    header.style.setProperty('--header-blend', String(headerBlend));
+    // Switch the background and all navigation colours together on any scroll.
+    header.classList.toggle('is-scrolled', window.scrollY > 0);
   }
   function scheduleScroll() {
     if (!frame) frame = requestAnimationFrame(updateScroll);
