@@ -73,6 +73,9 @@
       if(!o || typeof o.id!=='string' || orderIds.has(o.id) || !statuses.includes(o.status) || typeof o.customer!=='string' || typeof o.email!=='string' || typeof o.date!=='string' || typeof o.notes!=='string' || o.notes.length>2000 || !Array.isArray(o.items)) throw Error('Invalid order.');
       const subtotal=o.items.reduce((n,i)=>n+Math.round(i.unitPrice*100)*i.quantity,0);
       if(o.discountAmount!==undefined&&(!Number.isFinite(o.discountAmount)||o.discountAmount<0||Math.round(o.discountAmount*100)>subtotal))throw Error('Invalid order discount.');
+      if(o.delivery!==undefined){validateDelivery(o.delivery);if(o.shippingFee!==deliveryMethods[o.delivery.method].fee)throw Error('Invalid postage fee.');}
+      if(o.shippingFee!==undefined&&(!Number.isFinite(o.shippingFee)||o.shippingFee<0))throw Error('Invalid postage fee.');
+      if(o.paymentMethod!==undefined&&!['card','wallet'].includes(o.paymentMethod))throw Error('Invalid demo payment method.');
       orderIds.add(o.id);
       for(const i of o.items) if(typeof i.name!=='string' || !Number.isSafeInteger(i.quantity) || i.quantity<1 || !Number.isFinite(i.unitPrice) || i.unitPrice<0) throw Error('Invalid order item.');
     }
@@ -123,8 +126,16 @@
     window.dispatchEvent(new Event('meridian-store-change'));
     return copy(state);
   }
-  function createOrder({customer,email,items,paymentStatus='Unpaid',source='Admin',discountCode=''}) {
+  const deliveryMethods={normal:{label:'Normal delivery',fee:6,estimate:'3–5 working days'},express:{label:'Express delivery',fee:15,estimate:'1–2 working days'}};
+  function validateDelivery(delivery){
+    if(!delivery||typeof delivery!=='object'||!Object.hasOwn(deliveryMethods,delivery.method))throw Error('Choose normal or express delivery.');
+    for(const [field,max] of [['addressLine1',150],['city',100],['postalCode',30],['country',100]])if(typeof delivery[field]!=='string'||!delivery[field].trim()||delivery[field].length>max)throw Error('Complete the delivery address.');
+    for(const [field,max] of [['addressLine2',150],['instructions',500]])if(delivery[field]!==undefined&&(typeof delivery[field]!=='string'||delivery[field].length>max))throw Error('Check the delivery instructions and address.');
+  }
+  function createOrder({customer,email,items,paymentStatus='Unpaid',source='Admin',discountCode='',delivery,paymentMethod}) {
     if(typeof customer!=='string'||!customer.trim()||customer.trim().length>150||typeof email!=='string'||email.length>254||!/^\S+@\S+\.\S+$/.test(email)||!Array.isArray(items)||!items.length||items.length>100||!['Unpaid','Paid','Demo — no payment'].includes(paymentStatus)||!['Admin','Storefront'].includes(source))throw Error('Enter a name, valid email and order items.');
+    if(delivery!==undefined)validateDelivery(delivery);
+    if(paymentMethod!==undefined&&!['card','wallet'].includes(paymentMethod))throw Error('Choose a demo payment method.');
     const next=load(),seen=new Set();
     const snapshots=items.map(i=>{
       const p=next.products.find(p=>p.id===i.productId);
@@ -135,6 +146,8 @@
     const totals=quote(snapshots,discountCode);
     const id='DEMO-'+crypto.randomUUID();
     const order={id,date:new Date().toISOString().slice(0,10),customer:customer.trim(),email:email.trim(),status:'Processing',paymentStatus,source,notes:'',items:snapshots,discountCode:totals.discountCode,discountAmount:totals.discount};
+    if(delivery!==undefined){order.delivery=Object.fromEntries(Object.entries(delivery).filter(([field,value])=>value!==undefined&&['method','addressLine1','addressLine2','city','postalCode','country','instructions'].includes(field)).map(([field,value])=>[field,value.trim()]));order.shippingFee=deliveryMethods[delivery.method].fee;}
+    if(paymentMethod!==undefined)order.paymentMethod=paymentMethod;
     next.orders.unshift(order);save(next);return copy(order);
   }
   function quote(items,code=''){
@@ -158,5 +171,5 @@
     return next;
   }
   const escape = s => String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  window.MeridianStore={key,load,save,createOrder,validate,escape,statuses,quote,reset,money:n=>new Intl.NumberFormat('en-GB',{style:'currency',currency:'GBP'}).format(n),orderTotal:o=>(o.items.reduce((sum,i)=>sum+i.quantity*Math.round(i.unitPrice*100),0)-Math.round((o.discountAmount||0)*100))/100};
+  window.MeridianStore={key,load,save,createOrder,validate,escape,statuses,quote,reset,deliveryMethods,money:n=>new Intl.NumberFormat('en-GB',{style:'currency',currency:'GBP'}).format(n),orderTotal:o=>(o.items.reduce((sum,i)=>sum+i.quantity*Math.round(i.unitPrice*100),0)-Math.round((o.discountAmount||0)*100)+Math.round((o.shippingFee||0)*100))/100};
 })();
