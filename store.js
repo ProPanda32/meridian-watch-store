@@ -73,7 +73,7 @@
       if(!o || typeof o.id!=='string' || orderIds.has(o.id) || !statuses.includes(o.status) || typeof o.customer!=='string' || typeof o.email!=='string' || typeof o.date!=='string' || typeof o.notes!=='string' || o.notes.length>2000 || !Array.isArray(o.items)) throw Error('Invalid order.');
       const subtotal=o.items.reduce((n,i)=>n+Math.round(i.unitPrice*100)*i.quantity,0);
       if(o.discountAmount!==undefined&&(!Number.isFinite(o.discountAmount)||o.discountAmount<0||Math.round(o.discountAmount*100)>subtotal))throw Error('Invalid order discount.');
-      if(o.delivery!==undefined){validateDelivery(o.delivery);if(o.shippingFee!==deliveryMethods[o.delivery.method].fee)throw Error('Invalid postage fee.');}
+      if(o.delivery!==undefined){validateDelivery(o.delivery);if(![deliveryMethods[o.delivery.method].fee,{normal:6,express:15}[o.delivery.method]].includes(o.shippingFee))throw Error('Invalid postage fee.');}
       if(o.shippingFee!==undefined&&(!Number.isFinite(o.shippingFee)||o.shippingFee<0))throw Error('Invalid postage fee.');
       if(o.paymentMethod!==undefined&&!['card','wallet'].includes(o.paymentMethod))throw Error('Invalid demo payment method.');
       orderIds.add(o.id);
@@ -126,7 +126,7 @@
     window.dispatchEvent(new Event('meridian-store-change'));
     return copy(state);
   }
-  const deliveryMethods={normal:{label:'Normal delivery',fee:6,estimate:'3–5 working days'},express:{label:'Express delivery',fee:15,estimate:'1–2 working days'}};
+  const deliveryMethods={normal:{label:'Normal delivery',fee:15,estimate:'3–5 working days'},express:{label:'Express delivery',fee:30,estimate:'1–2 working days'}};
   function validateDelivery(delivery){
     if(!delivery||typeof delivery!=='object'||!Object.hasOwn(deliveryMethods,delivery.method))throw Error('Choose normal or express delivery.');
     for(const [field,max] of [['addressLine1',150],['city',100],['postalCode',30],['country',100]])if(typeof delivery[field]!=='string'||!delivery[field].trim()||delivery[field].length>max)throw Error('Complete the delivery address.');

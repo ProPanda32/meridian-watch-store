@@ -187,10 +187,10 @@ test('premium prices migrate old defaults and preserve custom prices and histori
 test('delivery checkout records address and postage with discounts only on watches',()=>{
  const b=browser();const delivery={method:'express',addressLine1:' 12 Example Street ',addressLine2:'Flat 2',city:'London',postalCode:'SW1A 1AA',country:'United Kingdom',instructions:'Ring the bell',fee:0};
  const order=b.store.createOrder({customer:'Demo',email:'demo@example.com',source:'Storefront',paymentStatus:'Demo — no payment',paymentMethod:'wallet',discountCode:'WELCOME10',delivery,items:[{productId:'noir',quantity:1}]});
- assert.equal(order.shippingFee,15);assert.equal(order.discountAmount,185);assert.equal(b.store.orderTotal(order),1680);
+ assert.equal(order.shippingFee,30);assert.equal(order.discountAmount,185);assert.equal(b.store.orderTotal(order),1695);
  assert.equal(order.delivery.addressLine1,'12 Example Street');assert.equal(order.delivery.instructions,'Ring the bell');assert.equal(order.paymentMethod,'wallet');assert.equal(order.delivery.fee,undefined);
- const saved=b.store.load();saved.products[0].price=999;b.store.save(saved);assert.equal(b.store.orderTotal(b.store.load().orders[0]),1680);
- const normal=b.store.createOrder({customer:'Demo',email:'demo@example.com',delivery:{...delivery,method:'normal'},items:[{productId:'silver',quantity:1}]});assert.equal(normal.shippingFee,6);assert.equal(b.store.orderTotal(normal),1456);
+ const saved=b.store.load();saved.products[0].price=999;b.store.save(saved);assert.equal(b.store.orderTotal(b.store.load().orders[0]),1695);
+ const normal=b.store.createOrder({customer:'Demo',email:'demo@example.com',delivery:{...delivery,method:'normal'},items:[{productId:'silver',quantity:1}]});assert.equal(normal.shippingFee,15);assert.equal(b.store.orderTotal(normal),1465);
 });
 test('invalid delivery cannot create orders or reduce stock and legacy orders retain totals',()=>{
  const b=browser(),initial=JSON.stringify(b.store.load()),delivery={method:'normal',addressLine1:'12 Example Street',city:'London',postalCode:'SW1A 1AA',country:'United Kingdom'};
@@ -198,4 +198,13 @@ test('invalid delivery cannot create orders or reduce stock and legacy orders re
  assert.equal(JSON.stringify(b.store.load()),initial);
  const state=b.store.load();assert.equal(b.store.orderTotal(state.orders.find(o=>o.id==='DEMO-1003')),185);
  const order=b.store.createOrder({customer:'Demo',email:'demo@example.com',delivery,items:[{productId:'noir',quantity:1}]});const tampered=b.store.load();tampered.orders[0].shippingFee=0;assert.throws(()=>b.store.save(tampered),/postage/);assert.equal(b.store.load().orders[0].shippingFee,order.shippingFee);
+});
+
+test('previous delivery rates remain valid without changing saved totals',()=>{
+ const b=browser(),delivery={method:'normal',addressLine1:'12 Example Street',city:'London',postalCode:'SW1A 1AA',country:'United Kingdom'};
+ b.store.createOrder({customer:'Demo',email:'demo@example.com',delivery,items:[{productId:'noir',quantity:1}]});
+ const state=b.store.load();state.orders[0].shippingFee=6;b.store.save(state);
+ assert.equal(b.store.orderTotal(b.store.load().orders[0]),1856);
+ state.orders[0].delivery.method='express';state.orders[0].shippingFee=15;b.store.save(state);
+ assert.equal(b.store.orderTotal(b.store.load().orders[0]),1865);
 });
