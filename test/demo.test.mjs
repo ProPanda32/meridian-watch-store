@@ -8,9 +8,9 @@ const source=readFileSync(new URL('../store.js',import.meta.url),'utf8');
 function browser(storage=new Map(),fail=false){const events=[];const context={window:{dispatchEvent:e=>events.push(e.type)},localStorage:{removeItem:k=>{if(fail)throw Error('Unavailable');storage.delete(k);},getItem:k=>storage.get(k)||null,setItem:(k,v)=>{if(fail)throw Error('Unavailable');storage.set(k,v);}},URL,Event,crypto:{randomUUID}};vm.runInNewContext(source,context);return {store:context.window.MeridianStore,events,storage};}
 test('storefront checkout appears in admin data with price snapshots and stock updates',()=>{
   const b=browser(),before=b.store.load();const order=b.store.createOrder({customer:'Demo shopper',email:'shopper@example.com',source:'Storefront',paymentStatus:'Demo — no payment',items:[{productId:'noir',quantity:2},{productId:'silver',quantity:1}]});
-  assert.equal(b.store.orderTotal(order),535);assert.equal(order.source,'Storefront');assert.equal(order.status,'Processing');
+  assert.equal(b.store.orderTotal(order),5150);assert.equal(order.source,'Storefront');assert.equal(order.status,'Processing');
   const admin=browser(b.storage),saved=admin.store.load();assert.equal(saved.orders[0].id,order.id);assert.equal(saved.orders.length,before.orders.length+1);assert.equal(saved.products[0].stock,10);assert.equal(saved.products[1].stock,7);
-  saved.products[0].price=200;admin.store.save(saved);assert.equal(admin.store.load().orders[0].items[0].unitPrice,185);assert.ok(b.events.includes('meridian-store-change'));
+  saved.products[0].price=200;admin.store.save(saved);assert.equal(admin.store.load().orders[0].items[0].unitPrice,1850);assert.ok(b.events.includes('meridian-store-change'));
 });
 test('invalid or unavailable checkout does not create an order or change stock',()=>{
   const b=browser();const initial=JSON.stringify(b.store.load());
@@ -65,7 +65,7 @@ test('all five new watches can be ordered with distinct image paths and stock sn
   const initial=b.store.load(),newProducts=ids.map(id=>initial.products.find(p=>p.id===id));
   assert.equal(new Set(newProducts.map(p=>p.image)).size,5);
   const order=b.store.createOrder({customer:'Demo',email:'demo@example.com',items:ids.map(productId=>({productId,quantity:1}))});
-  assert.equal(order.items.length,5);assert.equal(b.store.orderTotal(order),935);
+  assert.equal(order.items.length,5);assert.equal(b.store.orderTotal(order),9350);
   for(const product of newProducts){
     assert.equal(b.store.load().products.find(p=>p.id===product.id).stock,product.stock-1);
     assert.equal(order.items.find(i=>i.productId===product.id).unitPrice,product.price);
@@ -103,7 +103,7 @@ test('all five dress and sport watches can be checked out with individual stock 
   const products=ids.map(id=>b.store.load().products.find(p=>p.id===id));
   assert.equal(new Set(products.map(p=>p.image)).size,5);
   const order=b.store.createOrder({customer:'Demo',email:'demo@example.com',items:ids.map(productId=>({productId,quantity:1}))});
-  assert.equal(order.items.length,5);assert.equal(b.store.orderTotal(order),995);
+  assert.equal(order.items.length,5);assert.equal(b.store.orderTotal(order),10350);
   for(const product of products){
     assert.equal(b.store.load().products.find(p=>p.id===product.id).stock,product.stock-1);
     assert.equal(order.items.find(item=>item.productId===product.id).unitPrice,product.price);
@@ -136,8 +136,8 @@ test('demo trend history migrates once without changing saved orders, stock or s
 test('discount checkout stores an immutable discounted total and rejects unknown codes without saving',()=>{
  const b=browser(),initial=b.store.load();
  const order=b.store.createOrder({customer:'Demo',email:'demo@example.com',source:'Storefront',discountCode:' welcome10 ',items:[{productId:'noir',quantity:1}]});
- assert.equal(order.discountCode,'WELCOME10');assert.equal(order.discountAmount,18.5);assert.equal(b.store.orderTotal(order),166.5);
- const edited=b.store.load();edited.products[0].price=999;b.store.save(edited);assert.equal(b.store.orderTotal(b.store.load().orders[0]),166.5);
+ assert.equal(order.discountCode,'WELCOME10');assert.equal(order.discountAmount,185);assert.equal(b.store.orderTotal(order),1665);
+ const edited=b.store.load();edited.products[0].price=999;b.store.save(edited);assert.equal(b.store.orderTotal(b.store.load().orders[0]),1665);
  const before=JSON.stringify(b.store.load());assert.throws(()=>b.store.createOrder({customer:'Demo',email:'demo@example.com',discountCode:'invalid',items:[{productId:'silver',quantity:1}]}),/not recognised/);
  assert.equal(JSON.stringify(b.store.load()),before);assert.equal(initial.products[0].stock-b.store.load().products[0].stock,1);
  assert.equal(b.store.quote([{unitPrice:1.99,quantity:3}],'MERLOCK15').total,5.07);
@@ -171,4 +171,14 @@ test('background colours update old catalogue images without changing watches or
  b.store.save(saved);const cleaned=b.store.load();
  for(const product of cleaned.products){const expected=oldImages['assets/watches/'+product.id+'.webp'];if(expected&&product.id!=='blue-steel')assert.equal(product.image,expected);}
  assert.equal(cleaned.products.find(p=>p.id==='blue-steel').image,custom.image);
+});
+
+test('premium prices migrate old defaults and preserve custom prices and historical orders',()=>{
+ const b=browser(),state=b.store.load();state.products.find(p=>p.id==='noir').price=185;
+ state.products.find(p=>p.id==='silver').price=777;const orders=JSON.stringify(state.orders);
+ b.store.save(state);const updated=b.store.load();
+ assert.equal(updated.products.find(p=>p.id==='noir').price,1850);
+ assert.equal(updated.products.find(p=>p.id==='silver').price,777);
+ assert.equal(JSON.stringify(updated.orders),orders);
+ assert.ok(browser().store.load().products.every(p=>p.price>=1250&&p.price<=2450));
 });
