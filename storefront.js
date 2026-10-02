@@ -68,7 +68,11 @@ function render(){state=store.load();document.title=state.settings.name+' | Time
     button.setAttribute('aria-selected',String(selected));button.tabIndex=selected?0:-1;
     button.querySelector('[data-collection-count]').textContent=collectionProducts(button.dataset.collection).length;
   }
-  const visibleProducts=shop.filter(collectionProducts(selectedCollection),Object.fromEntries(new FormData($('collection-filters'))),state.orders);
+  const filters=Object.fromEntries(new FormData($('collection-filters')));
+  const activeCount=Object.entries(filters).filter(([key,value])=>value&&(key!=='sort'||value!=='featured')).length;
+  $('filter-active-count').hidden=!activeCount;
+  $('filter-active-count').textContent=`${activeCount} active`;
+  const visibleProducts=shop.filter(collectionProducts(selectedCollection),filters,state.orders);
   $('products').setAttribute('aria-labelledby','collection-tab-'+selectedCollection);
   $('collection-status').textContent=`Showing ${visibleProducts.length} ${visibleProducts.length===1?'watch':'watches'}.`;
   $('collection-results').textContent=`${visibleProducts.length} ${visibleProducts.length===1?'watch':'watches'} in this view`;
