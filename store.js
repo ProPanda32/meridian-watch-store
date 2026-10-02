@@ -26,6 +26,13 @@
   const statuses = ['Processing','Shipped','Delivered','Cancelled'];
   function validate(s) {
     if (!s || s.version!==1 || typeof s.settings?.name!=='string' || !s.settings.name.trim() || s.settings.name.length>60 || typeof s.settings.announcement!=='string' || s.settings.announcement.length>160 || !Array.isArray(s.products) || !Array.isArray(s.orders)) throw Error('Invalid store data.');
+    if(s.settings.musicUrl!==undefined){
+      if(typeof s.settings.musicUrl!=='string'||s.settings.musicUrl.length>2000)throw Error('Use a valid HTTPS audio URL.');
+      if(s.settings.musicUrl){
+        try{if(new URL(s.settings.musicUrl).protocol!=='https:')throw Error();}
+        catch{throw Error('Use a valid HTTPS audio URL.');}
+      }
+    }
     const ids = new Set();
     for (const p of s.products) {
       if (!p || typeof p.id!=='string' || !/^[a-z0-9-]+$/.test(p.id) || ids.has(p.id)) throw Error('Invalid product identifier.');

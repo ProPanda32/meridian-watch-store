@@ -114,6 +114,20 @@
     if(document.hidden) {attempt++;stopFade();music.pause();music.volume=0;adjustingVolume=false;hideVolume();}
     else if(enabled) void play();
   });
+  const defaultTrack='assets/music/chopin-prelude-a-major.mp3';
+  let currentTrack=defaultTrack;
+  function syncTrack(restart=true){
+    const source=window.MeridianStore?.load().settings.musicUrl||defaultTrack;
+    if(source===currentTrack)return;
+    currentTrack=source;attempt++;stopFade();music.pause();music.volume=0;
+    music.src=source;music.load();status.textContent='';
+    if(restart&&enabled&&!document.hidden)void play();
+    else render();
+  }
+  syncTrack(false);
+  window.addEventListener('meridian-store-change',()=>syncTrack());
+  window.addEventListener('storage',event=>{if(event.key===window.MeridianStore?.key)syncTrack();});
+  window.addEventListener('focus',()=>syncTrack());
   render();
   if(!document.hidden) void play();
 })();

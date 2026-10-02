@@ -13,7 +13,7 @@ function render(){document.querySelector('.brand').textContent=state.settings.na
   $('recent-orders').innerHTML=orderTable(state.orders.slice(0,5));renderOrders();
   const low=state.products.filter(p=>p.stock<=5);$('low-stock').innerHTML=low.length?low.map(p=>`<div class="stock-row"><button class="stock-link" data-stock-product="${esc(p.id)}" aria-label="Update stock for ${esc(p.name)}">${esc(p.name)}</button><span>${stockTag(p)} ${p.stock} remaining</span></div>`).join(''):'<p>All products have more than five units in stock.</p>';
   $('product-list').innerHTML=state.products.map(p=>`<article class="product"><img src="${esc(p.image)}" alt="${esc(p.name)}"><div><h2>${esc(p.name)}</h2><p>${money(p.price)} · ${p.stock} in stock · ${p.active?'Visible':'Hidden'}</p>${stockTag(p)}</div><button data-product="${esc(p.id)}">Edit product</button></article>`).join('');
-  const f=$('settings-form');f.elements.name.value=state.settings.name;f.elements.announcement.value=state.settings.announcement;
+  const f=$('settings-form');f.elements.name.value=state.settings.name;f.elements.announcement.value=state.settings.announcement;f.elements.musicChoice.value=state.settings.musicUrl?'custom':'default';f.elements.musicUrl.value=state.settings.musicUrl||'';syncMusicSettings();
 }
 function editProduct(id){const p=id?state.products.find(p=>p.id===id):{id:'',name:'',style:'',price:0,stock:0,image:'',description:'',badge:'',active:true};if(!p)return;const f=$('product-form');for(const k of ['id','name','style','price','stock','image','description','badge'])f.elements[k].value=p[k];f.elements.active.checked=p.active;$('product-dialog-title').textContent=id?'Edit product':'Add product';$('product-error').textContent='';$('remove-product').hidden=!id;$('product-dialog').showModal();}
 function viewOrder(id){const o=state.orders.find(o=>o.id===id);if(!o)return;const f=$('order-form');f.elements.id.value=id;f.elements.status.value=o.status;f.elements.paymentStatus.value=o.paymentStatus||'Unpaid';f.elements.notes.value=o.notes;$('order-dialog-title').textContent=o.id;$('order-error').textContent='';$('order-details').innerHTML=`<p>${esc(o.customer)}<br>${esc(o.email)}<br>${esc(o.date)}<br>Payment: ${esc(o.paymentStatus||'Sample')}<br>Source: ${esc(o.source||'Sample')}</p>${o.items.map(i=>`<p>${esc(i.name)} × ${i.quantity} — ${money(i.unitPrice*i.quantity)}</p>`).join('')}<p><strong>Total: ${money(store.orderTotal(o))}</strong></p><p class="muted">Original order prices stay unchanged when you edit product prices.</p>`;$('order-dialog').showModal();}
@@ -30,7 +30,25 @@ $('remove-product').addEventListener('click',()=>{
 });
 $('product-form').addEventListener('submit',async e=>{e.preventDefault();const f=e.currentTarget;if(!f.reportValidity())return;const next=store.load();const id=f.elements.id.value||`watch-${crypto.randomUUID()}`;const p={id,name:f.elements.name.value.trim(),style:f.elements.style.value.trim(),price:Number(f.elements.price.value),stock:Number(f.elements.stock.value),image:f.elements.image.value.trim(),description:f.elements.description.value.trim(),badge:f.elements.badge.value.trim(),active:f.elements.active.checked};const index=next.products.findIndex(p=>p.id===id);if(index<0)next.products.push(p);else next.products[index]=p;try{await commit(next);$('product-dialog').close();}catch(err){$('product-error').textContent=err.message;}});
 $('order-form').addEventListener('submit',async e=>{e.preventDefault();const f=e.currentTarget,next=store.load(),o=next.orders.find(o=>o.id===f.elements.id.value);if(!o){$('order-error').textContent='This order no longer exists.';return;}o.status=f.elements.status.value;o.paymentStatus=f.elements.paymentStatus.value;o.notes=f.elements.notes.value;try{await commit(next);$('order-dialog').close();}catch(err){$('order-error').textContent=err.message;}});
-$('settings-form').addEventListener('submit',async e=>{e.preventDefault();if(!e.currentTarget.reportValidity())return;const next=store.load();next.settings={name:e.currentTarget.elements.name.value.trim(),announcement:e.currentTarget.elements.announcement.value.trim()};try{await commit(next);}catch(err){notify(err.message,true);}});
+function syncMusicSettings(){
+  const custom=$('settings-form').elements.musicChoice.value==='custom';
+  $('custom-music-field').hidden=!custom;
+  $('settings-form').elements.musicUrl.required=custom;
+  $('settings-form').elements.musicUrl.disabled=!custom;
+  $('music-preview').pause();$('music-preview').hidden=true;
+}
+$('music-choice').addEventListener('change',syncMusicSettings);
+$('settings-form').elements.musicUrl.addEventListener('input',()=>{$('music-preview').pause();$('music-preview').hidden=true;});
+$('preview-music').addEventListener('click',()=>{
+  const form=$('settings-form');const custom=form.elements.musicChoice.value==='custom';
+  if(custom&&!form.elements.musicUrl.reportValidity())return;
+  const source=custom?form.elements.musicUrl.value.trim():'assets/music/chopin-prelude-a-major.mp3';
+  if(custom&&!source.startsWith('https://')){notify('Use a direct HTTPS audio URL.',true);return;}
+  const audio=$('music-preview');audio.src=source;audio.volume=.2;audio.hidden=false;
+  audio.play().catch(()=>notify('The audio could not play. Check that the URL points to an accessible audio file.',true));
+});
+$('music-preview').addEventListener('error',()=>{if(!$('music-preview').hidden)notify('The audio could not load. Check the audio file URL.',true);});
+$('settings-form').addEventListener('submit',async e=>{e.preventDefault();if(!e.currentTarget.reportValidity())return;const next=store.load();next.settings={...next.settings,name:e.currentTarget.elements.name.value.trim(),announcement:e.currentTarget.elements.announcement.value.trim(),musicUrl:e.currentTarget.elements.musicChoice.value==='custom'?e.currentTarget.elements.musicUrl.value.trim():''};try{await commit(next);}catch(err){notify(err.message,true);}});
 window.addEventListener('storage',e=>{if(e.key===store.key){state=store.load();render();notify('Updated from another tab in this browser.');}});
 render();
 

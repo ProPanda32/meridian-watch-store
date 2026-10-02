@@ -60,3 +60,5 @@
 .product-editor-actions{display:flex;gap:12px;flex-wrap:wrap}
 .danger-button{border:1px solid #a02222;background:transparent;color:#a02222;padding:12px 18px;border-radius:3px;min-height:44px}
 @media(max-width:600px){.product-editor-actions{flex-direction:column}.product-editor-actions button{width:100%}.stock-row>span{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.stock-row .stock-tag{margin:0}}
+
+#music-preview{display:block;width:100%;max-width:100%;margin-top:16px}

@@ -109,3 +109,17 @@ test('all five dress and sport watches can be checked out with individual stock 
     assert.equal(order.items.find(item=>item.productId===product.id).unitPrice,product.price);
   }
 });
+
+test('music settings persist across store edits and reject unsupported audio URLs',()=>{
+  const b=browser(),state=b.store.load();
+  state.settings.musicUrl='https://example.com/piano.mp3';b.store.save(state);
+  assert.equal(b.store.load().settings.musicUrl,state.settings.musicUrl);
+  b.store.createOrder({customer:'Music setting test',email:'music@example.com',source:'Storefront',paymentStatus:'Demo — no payment',items:[{productId:'noir',quantity:1}]});
+  assert.equal(b.store.load().settings.musicUrl,state.settings.musicUrl);
+  for(const musicUrl of ['http://example.com/piano.mp3','javascript:alert(1)','not-a-url',123]){
+    const invalid=b.store.load();invalid.settings.musicUrl=musicUrl;
+    assert.throws(()=>b.store.save(invalid),/HTTPS audio URL/);
+  }
+  const reset=b.store.load();reset.settings.musicUrl='';b.store.save(reset);
+  assert.equal(b.store.load().settings.musicUrl,'');
+});
