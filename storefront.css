@@ -317,3 +317,23 @@ select:focus-visible,textarea:focus-visible,summary:focus-visible{outline:2px so
 .sort-filter-dropdown .collection-filters{padding-top:16px}
 #collection-results{margin:12px 0 20px}
 @media(max-width:600px){.collection-toolbar{gap:6px}.collection-toolbar .collection-tools{gap:4px}.collection-toolbar .outline-button{padding:8px;font-size:12px}.filter-toggle{gap:6px;font-size:12px}.desktop-tool-label{display:none}.collection-toolbar .collection-tools span{margin-left:3px}}
+
+/* Brand story pages */
+.story-header{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:26px 5%;border-bottom:1px solid var(--line)}
+.story-nav{display:flex;flex-wrap:wrap;gap:8px 24px;font-size:13px}
+.story-nav a{padding:12px 0}.story-nav a[aria-current="page"]{text-decoration:underline;text-underline-offset:6px}
+.story-main{margin:0 5%;padding:72px 0 90px}
+.story-hero{display:grid;grid-template-columns:1.15fr 1fr;gap:8%;align-items:center;margin-bottom:72px}
+.story-main h1,.story-main h2{font-family:"Bodoni Moda",Georgia,serif;font-weight:400;line-height:1.12}
+.story-main h1{font-size:clamp(42px,6vw,84px);margin:16px 0 24px}
+.story-main h2{font-size:clamp(28px,3vw,42px);margin:0 0 18px}
+.story-main p{line-height:1.8;color:#5e625d}
+.story-hero img{display:block;width:100%;aspect-ratio:1;object-fit:cover}
+.story-chapters{border-top:1px solid var(--line)}
+.story-chapter{display:grid;grid-template-columns:1fr 1.6fr;gap:8%;padding:36px 0;border-bottom:1px solid var(--line)}
+.story-chapter p{margin:0}.story-chapter .eyebrow{margin-bottom:12px}
+.story-cta{display:inline-block;border-bottom:1px solid var(--ink);padding:12px 0;margin-top:28px}
+.creator-list{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:32px;margin-top:36px}
+.creator-list article{border-top:1px solid var(--line);padding-top:24px}.creator-list h2{font-size:28px}
+.story-footer{margin-top:0}
+@media(max-width:600px){.story-header{align-items:flex-start;flex-direction:column;gap:12px}.story-header .logo{font-size:28px}.story-nav{gap:4px 18px}.story-main{padding:42px 0 54px}.story-hero{grid-template-columns:1fr;gap:28px;margin-bottom:42px}.story-chapter{grid-template-columns:1fr;gap:16px;padding:28px 0}.creator-list{grid-template-columns:1fr;gap:20px}}

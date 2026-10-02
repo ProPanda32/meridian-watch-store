@@ -8,6 +8,7 @@ for (const name of ['champagne-moonphase','midnight-moonphase','landing-page-pos
 for(const name of ["emerald-gold-elegant-bg", "blue-steel-elegant-bg", "obsidian-black-elegant-bg", "silver-blue-elegant-bg", "two-tone-gmt-elegant-bg", "gold-rectangle-elegant-bg", "navy-moonphase-elegant-bg", "green-chronograph-elegant-bg", "pearl-two-tone-elegant-bg", "black-skeleton-elegant-bg"]) files['/assets/watches/'+name+'.webp']='assets/watches/'+name+'.webp';
 files['/assets/watches/landing-page-video.webm']='assets/watches/landing-page-video.webm';
 files['/assets/fonts/bodoni-moda.ttf']='assets/fonts/bodoni-moda.ttf';
+for(const name of ['history','who-we-are']){files['/'+name+'.html']=name+'.html';files['/'+name]=name+'.html';}
 const port=Number(process.env.PORT||3000);
 export function createDemoServer(){return http.createServer((req,res)=>{
   const pathname=new URL(req.url,'http://localhost').pathname;
