@@ -167,7 +167,8 @@ test('background colours update old catalogue images without changing watches or
  assert.equal(saved.products.find(p=>p.id==='emerald-gold').stock,3);assert.equal(saved.products.find(p=>p.id==='emerald-gold').price,199);
  assert.equal(saved.products.find(p=>p.id==='blue-steel').image,custom.image);assert.equal(JSON.stringify(saved.orders),orders);
  assert.deepEqual(saved.products.slice(0,2).map(p=>p.image),firstTwo);
- for(const product of saved.products){if(Object.values(oldImages).includes(product.image))product.image=product.image.replace('-clean-bg.webp','-bg.webp');}
+ for(const product of saved.products){if(Object.values(oldImages).includes(product.image))product.image=Object.entries(oldImages).find(([,current])=>current===product.image)[0];}
+ saved.products.find(p=>p.id==='obsidian-black').image='assets/watches/obsidian-black-violet-clean-bg.webp';
  b.store.save(saved);const cleaned=b.store.load();
  for(const product of cleaned.products){const expected=oldImages['assets/watches/'+product.id+'.webp'];if(expected&&product.id!=='blue-steel')assert.equal(product.image,expected);}
  assert.equal(cleaned.products.find(p=>p.id==='blue-steel').image,custom.image);
