@@ -53,7 +53,7 @@ collectionTabs.addEventListener('keydown',event=>{
   else return;
   event.preventDefault();selectCollection(buttons[next]);buttons[next].focus();
 });
-function toast(message){$('toast').textContent=message;$('toast').style.display='block';clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').style.display='none',2500);}
+function toast(message){$('toast').textContent=message;$('toast').classList.add('is-visible');clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').classList.remove('is-visible'),2500);}
 let renderedCollection;
 function render(){state=store.load();document.title=state.settings.name+' | Time, well chosen.';document.querySelectorAll('.logo').forEach(el=>el.textContent=state.settings.name.toUpperCase());document.querySelector('.announcement').textContent=state.settings.announcement;$('year').textContent=new Date().getFullYear();
   for(const [id,q]of bag){const p=state.products.find(p=>p.id===id);if(!p||!p.active||p.stock===0)bag.delete(id);else if(q>p.stock)bag.set(id,p.stock);}

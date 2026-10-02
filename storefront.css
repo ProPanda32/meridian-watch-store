@@ -100,7 +100,8 @@ dialog::backdrop{background:#0008}
 .quantity .remove{border:0;background:none;color:#626a60;text-decoration:underline;font-size:12px}
 .total{display:flex;justify-content:space-between;margin:28px 0;font-size:19px;gap:16px}
 .preview-note{font-size:13px;color:#6a7167;line-height:1.6}
-.toast{position:fixed;bottom:25px;left:50%;transform:translateX(-50%);max-width:calc(100% - 32px);background:#202522;color:#fff;padding:15px 22px;z-index:40;box-shadow:0 4px 25px #0003;display:none}
+.toast{position:fixed;bottom:25px;left:50%;transform:translateX(-50%);max-width:calc(100% - 32px);background:#202522;color:#fff;padding:15px 22px;z-index:40;box-shadow:0 4px 25px #0003;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .3s ease,visibility 0s linear .3s}
+.toast.is-visible{opacity:1;visibility:visible;transition:none}
 .checkout-label{display:block;margin:18px 0;font-size:14px}
 .checkout-label input{display:block;width:100%;padding:12px;margin-top:8px;border:1px solid #bdc2b9;background:var(--paper);font:inherit}
 .checkout-error{color:#a02222}
@@ -175,13 +176,15 @@ dialog::backdrop{background:#0008}
 
 
 
-.bag-stepper{display:flex;align-items:center;flex:0 0 auto;width:max-content;border:1px solid #bfc2bb}
-.bag-stepper button,.product-actions .bag-stepper button{flex:0 0 44px;width:44px;min-height:44px;padding:0;border:0;background:transparent;color:var(--ink);font-size:22px;line-height:1}
+.bag-stepper{display:grid;grid-template-columns:minmax(0,1fr) 28px minmax(0,1fr);align-items:center;width:100%;height:46px;border:1px solid #bfc2bb}
+.bag-stepper button,.product-actions .bag-stepper button{width:100%;min-width:0;height:44px;min-height:44px;padding:0;border:0;background:transparent;color:var(--ink);font-size:22px;line-height:1}
 .bag-stepper button:hover:not(:disabled){background:#e7e7e0}
 .bag-stepper button:disabled{opacity:.3;cursor:not-allowed}
 .bag-stepper span{min-width:28px;text-align:center;font-size:14px;font-variant-numeric:tabular-nums}
-.bag-controls{display:flex;flex:1;min-width:0}
-.bag-add-button,.product-actions .bag-add-button{width:100%;min-height:44px;padding:12px 18px;border:1px solid var(--ink);background:var(--ink);color:var(--paper);font-size:13px}
-#detail-bag-controls .bag-controls{margin-top:16px;width:max-content}
+.bag-controls{display:flex;flex:1;min-width:0;height:46px}
+.bag-add-button,.product-actions .bag-add-button{width:100%;height:46px;min-height:46px;padding:0 8px;border:1px solid var(--ink);background:var(--ink);color:var(--paper);font-size:13px}
+#detail-bag-controls .bag-controls{margin-top:16px;width:132px;max-width:100%}
 
 .bag-add-button.is-sold-out:disabled,.product-actions .bag-add-button.is-sold-out:disabled{background:#e7e7e0;border-color:#bfc2bb;color:var(--ink);opacity:1;cursor:not-allowed}
+
+@media(prefers-reduced-motion:reduce){.toast{transition:none}}
