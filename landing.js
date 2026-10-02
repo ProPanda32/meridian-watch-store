@@ -11,8 +11,6 @@
   let inView = true;
   let failed = false;
   let frame = 0;
-  let filmProgress;
-  let lastFrameTime;
   const nativeScrollMotion = CSS.supports('animation-timeline', 'scroll(root block)') && CSS.supports('animation-range', '0px 24svh');
   let heroTop = 0;
   let heroTravel = 1;
@@ -63,21 +61,15 @@
   document.addEventListener('visibilitychange', syncPlayback);
 
   // Pin briefly, then let normal page scrolling carry the film out of view.
-  function updateScroll(timestamp = performance.now()) {
+  function updateScroll() {
     frame = 0;
     const progress = motion.matches ? 0 : Math.min(1, Math.max(0, window.scrollY - heroTop) / heroTravel);
-    // Ease endpoints and absorb wheel/touch steps with a short follow-through.
-    // Use elapsed time so the response stays consistent across refresh rates.
-    const target = progress * progress * (3 - 2 * progress);
-    const elapsed = Math.min(64, Math.max(0, timestamp - (lastFrameTime ?? timestamp)));
-    lastFrameTime = timestamp;
-    if(filmProgress === undefined || motion.matches || nativeScrollMotion) filmProgress = target;
-    else filmProgress += (target - filmProgress) * (1 - Math.exp(-elapsed / 90));
-    if(Math.abs(target - filmProgress) < .0001) filmProgress = target;
-    const opacity = Math.max(0, 1 - filmProgress * 1.3);
+    // Follow the current position exactly; never continue zooming after scroll stops.
+    const easedProgress = progress * progress * (3 - 2 * progress);
+    const opacity = Math.max(0, 1 - easedProgress * 1.3);
     if(!nativeScrollMotion){
-      hero.style.setProperty('--film-scale', String(1 + filmProgress * .065));
-      hero.style.setProperty('--copy-y', `${-filmProgress * 40}px`);
+      hero.style.setProperty('--film-scale', String(1 + easedProgress * .065));
+      hero.style.setProperty('--copy-y', `${-easedProgress * 40}px`);
       hero.style.setProperty('--copy-opacity', String(opacity));
     }
     copy.inert = opacity < .05;
@@ -86,13 +78,9 @@
     const headerProgress = Math.min(1, Math.max(0, window.scrollY) / 140);
     const headerBlend = motion.matches ? Number(window.scrollY > 8) : headerProgress * headerProgress * (3 - 2 * headerProgress);
     header.style.setProperty('--header-blend', String(headerBlend));
-    if(filmProgress !== target && !document.hidden) frame = requestAnimationFrame(updateScroll);
   }
   function scheduleScroll() {
-    if (!frame) {
-      lastFrameTime = performance.now();
-      frame = requestAnimationFrame(updateScroll);
-    }
+    if (!frame) frame = requestAnimationFrame(updateScroll);
   }
   window.addEventListener('scroll', scheduleScroll, { passive: true });
   window.addEventListener('resize', () => {measureHero();scheduleScroll();});
