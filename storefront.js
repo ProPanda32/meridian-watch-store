@@ -1,5 +1,32 @@
 const store=window.MeridianStore,esc=store.escape,money=store.money,$=id=>document.getElementById(id);
 const shop=window.MerlockShop;
+// Only the bundled photos have matching empty background plates.
+const watchLayers={
+  'champagne-moonphase':[1672,941,'800,68 1008,68 1065,140 1070,750 1010,900 960,941 620,941 600,790 560,580 575,360 650,210 740,156'],
+  'midnight-moonphase':[1254,1254,'585,75 862,75 931,180 935,780 855,1080 950,1254 300,1254 420,1080 380,790 310,620 310,400 415,235 500,180'],
+  'emerald-gold-elegant-bg':[834,460,'277,0 445,0 480,65 535,110 562,163 566,247 531,333 546,460 370,460 346,375 297,324 260,250 260,180 281,88'],
+  'blue-steel-elegant-bg':[834,460,'277,0 455,0 485,68 553,112 573,180 573,273 535,350 552,460 369,460 338,375 293,320 266,250 261,174 281,89'],
+  'obsidian-black-elegant-bg':[557,476,'144,5 280,5 340,49 369,88 408,153 427,163 430,217 407,266 388,333 399,476 252,476 209,391 166,332 131,272 130,168 145,111'],
+  'silver-blue-elegant-bg':[550,476,'126,0 257,0 285,51 327,89 379,152 408,173 405,212 381,230 358,303 373,476 239,476 208,400 177,337 121,276 112,188 125,126'],
+  'two-tone-gmt-elegant-bg':[556,476,'174,5 307,5 335,51 370,97 414,153 441,150 445,199 423,234 398,305 412,455 377,476 279,476 243,393 212,341 162,280 150,196 157,125'],
+  'gold-rectangle-elegant-bg':[460,460,'101,10 216,10 243,59 279,89 297,161 334,165 340,213 317,222 340,303 326,343 349,460 221,460 199,395 171,350 147,314 121,210 107,127'],
+  'navy-moonphase-elegant-bg':[460,460,'97,9 222,9 255,61 302,103 350,150 379,165 385,209 362,228 337,306 363,460 227,460 192,393 158,344 103,285 87,202 94,128'],
+  'green-chronograph-elegant-bg':[476,476,'104,9 246,9 279,56 311,96 351,112 367,144 362,161 385,162 388,196 368,222 383,235 381,272 356,284 338,324 369,476 225,476 198,401 154,352 102,285 86,208 95,122'],
+  'pearl-two-tone-elegant-bg':[476,476,'92,7 222,7 251,54 301,93 342,146 365,162 369,194 346,215 327,296 352,429 363,476 243,476 212,406 179,353 126,289 95,213 92,139'],
+  'black-skeleton-elegant-bg':[476,476,'103,4 247,4 281,49 307,93 357,143 397,163 400,204 375,219 393,238 396,270 364,285 345,324 376,476 228,476 191,400 151,355 111,301 102,243 96,168 102,104']
+};
+function watchImage(product){
+  const label=product.name?`${product.name} — ${product.style}`:`${product.style} watch`;
+  const photo=`<img class="watch-photo" src="${esc(product.image)}" alt="${esc(label)}" loading="lazy">`;
+  const name=product.image.replace(/^assets\/watches\//,'').replace(/\.webp$/,'');
+  const layer=watchLayers[name];
+  if(!layer||product.image!==`assets/watches/${name}.webp`)return photo;
+  const [width,height,points]=layer;
+  // Keep the original scenery outside the watch visible throughout the dissolve.
+  const hole='M'+points.split(' ').join('L')+'Z';
+  const mask=encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}"><path fill="white" fill-rule="evenodd" d="M0 0H${width}V${height}H0Z ${hole}"/></svg>`).replace(/'/g,'%27');
+  return `<img class="watch-backdrop" src="assets/watches/${name}-empty.webp" alt="" aria-hidden="true" loading="lazy"><img class="watch-context" src="${esc(product.image)}" alt="" aria-hidden="true" loading="lazy" style="--watch-mask:url('data:image/svg+xml,${mask}')">${photo}`;
+}
 const bagKey='merlock-bag-v1',wishKey='merlock-wishlist-v1',couponKey='merlock-coupon-v1';
 function readPreference(key,fallback){try{return shop.read(localStorage,key,fallback);}catch{return fallback;}}
 let state=store.load();const bag=shop.normaliseBag(readPreference(bagKey,[]),state.products);
@@ -85,7 +112,7 @@ function render(){state=store.load();document.title=state.settings.name+' | Time
   const collectionSignature=JSON.stringify([selectedCollection,visibleProducts]);
   if(collectionSignature!==renderedCollection){
   renderedCollection=collectionSignature;
-  $('products').innerHTML=visibleProducts.map(p=>`<article><div class="product-image"><img src="${esc(p.image)}" alt="${esc(p.name)} — ${esc(p.style)}" loading="lazy">${p.category==='accessory'?'':`<button class="wish-button" type="button" data-wish="${p.id}" aria-label="Save ${esc(p.name)}" aria-pressed="${wishlist.has(p.id)}"><svg class="icon" aria-hidden="true"><use href="#icon-heart"/></svg></button>`}<span class="badge${p.stock===0?' sold-out-badge':''}">${p.stock===0?'Sold out':esc(p.badge)}</span></div><div class="product-info"><div><h3>${esc(p.name)}</h3><p>${esc(p.style)}</p></div><span class="price">${money(p.price)}</span></div><div class="product-actions"><button data-details="${p.id}">View details</button>${bagStepper(p)}</div>${p.category==='accessory'?'':`<div class="card-extras"><span class="sample-rating" aria-label="Sample rating 4.5 out of 5">★ 4.5 <small>Sample reviews</small></span><label><input type="checkbox" data-compare="${p.id}" ${comparison.has(p.id)?'checked':''}> Compare</label></div>`}</article>`).join('')||'<div class="empty-collection"><p>No products match these filters.</p><button class="outline-button" type="button" id="empty-reset">Clear filters</button></div>';
+  $('products').innerHTML=visibleProducts.map(p=>`<article><div class="product-image">${watchImage(p)}${p.category==='accessory'?'':`<button class="wish-button" type="button" data-wish="${p.id}" aria-label="Save ${esc(p.name)}" aria-pressed="${wishlist.has(p.id)}"><svg class="icon" aria-hidden="true"><use href="#icon-heart"/></svg></button>`}<span class="badge${p.stock===0?' sold-out-badge':''}">${p.stock===0?'Sold out':esc(p.badge)}</span></div><div class="product-info"><div><h3>${esc(p.name)}</h3><p>${esc(p.style)}</p></div><span class="price">${money(p.price)}</span></div><div class="product-actions"><button data-details="${p.id}">View details</button>${bagStepper(p)}</div>${p.category==='accessory'?'':`<div class="card-extras"><span class="sample-rating" aria-label="Sample rating 4.5 out of 5">★ 4.5 <small>Sample reviews</small></span><label><input type="checkbox" data-compare="${p.id}" ${comparison.has(p.id)?'checked':''}> Compare</label></div>`}</article>`).join('')||'<div class="empty-collection"><p>No products match these filters.</p><button class="outline-button" type="button" id="empty-reset">Clear filters</button></div>';
   }
   syncShoppingTools();renderWishlist();
   renderBag();

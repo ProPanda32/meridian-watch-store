@@ -139,7 +139,22 @@
   function prepareCards() {
     const columns = getComputedStyle(productsPanel).gridTemplateColumns.split(' ').length;
     for (const [index, card] of [...productsPanel.children].entries()) {
-      if (card.tagName === 'ARTICLE') prepareReveal(card, true, (index % columns) * 80);
+      if (card.tagName !== 'ARTICLE') continue;
+      prepareReveal(card, true, (index % columns) * 80);
+      // Begin the dissolve only when the layers are loaded, including on slow connections.
+      const pictures = [...card.querySelectorAll('.product-image img')];
+      Promise.all(pictures.map(picture => new Promise(resolve => {
+        if (picture.complete) return resolve();
+        picture.addEventListener('load', resolve, { once: true });
+        picture.addEventListener('error', () => {
+          // A missing backdrop must not leave an empty hole in the product photo.
+          if (picture.classList.contains('watch-backdrop')) {
+            card.querySelector('.watch-context')?.remove();
+            picture.remove();
+          }
+          resolve();
+        }, { once: true });
+      }))).then(() => card.classList.add('watch-ready'));
     }
   }
   prepareCards();
@@ -199,3 +214,4 @@
     window.showDetails(result.dataset.searchProduct);
   });
 })();
+

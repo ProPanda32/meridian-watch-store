@@ -55,6 +55,9 @@ h2{font-family:Georgia,serif;font-size:40px;font-weight:normal;line-height:1.2;m
 .product-image{aspect-ratio:1/1;position:relative;background:#131918;overflow:hidden}
 .product-image img{width:100%;height:100%;object-fit:cover;object-position:center;display:block;transition:transform .5s}
 .product-image:hover img{transform:scale(1.04)}
+.product-image .watch-backdrop,.product-image .watch-context{position:absolute;inset:0;pointer-events:none}
+.product-image .watch-context{mask-image:var(--watch-mask);mask-size:cover;mask-position:center;mask-repeat:no-repeat;-webkit-mask-image:var(--watch-mask);-webkit-mask-size:cover;-webkit-mask-position:center;-webkit-mask-repeat:no-repeat}
+.product-image .watch-photo{position:relative}
 .badge{position:absolute;top:16px;left:16px;max-width:calc(100% - 32px);background:var(--paper);padding:8px 12px;font-size:11px}
 .product-info{padding-top:21px;display:flex;justify-content:space-between;gap:12px}
 .product-info h3{margin:0 0 8px;font-size:21px;font-family:Georgia,serif;font-weight:normal;overflow-wrap:anywhere}
@@ -67,11 +70,14 @@ h2{font-family:Georgia,serif;font-size:40px;font-weight:normal;line-height:1.2;m
 .editorial p:not(.eyebrow){margin:0;line-height:1.9;color:#5e625d;max-width:520px}
 .reveal{opacity:0;transform:translateY(22px);transition:opacity .85s ease var(--reveal-delay,0ms),transform .85s cubic-bezier(.2,.65,.3,1) var(--reveal-delay,0ms)}
 .reveal.is-visible,.reveal:has(:focus-visible){opacity:1;transform:none}
-.reveal-card>.product-image,.reveal-card>.product-info,.reveal-card>.product-actions,.reveal-card>.card-extras{opacity:0;transform:translateY(24px);transition:opacity .9s ease,transform .9s cubic-bezier(.2,.65,.3,1);transition-delay:var(--reveal-delay,0ms)}
-.reveal-card>.product-info{transition-delay:calc(var(--reveal-delay,0ms) + 120ms)}
-.reveal-card>.product-actions,.reveal-card>.card-extras{transition-delay:calc(var(--reveal-delay,0ms) + 180ms)}
+.reveal-card>.product-info,.reveal-card>.product-actions,.reveal-card>.card-extras{opacity:0;transform:translateY(18px);transition:opacity .9s ease,transform .9s cubic-bezier(.2,.65,.3,1);transition-delay:var(--reveal-delay,0ms)}
+.reveal-card .watch-photo{opacity:0;transition:opacity 1.65s cubic-bezier(.2,.55,.3,1) calc(var(--reveal-delay,0ms) + 250ms),transform .5s ease}
+.reveal-card.is-visible.watch-ready .watch-photo,.reveal-card:has(:focus-visible) .watch-photo{opacity:1}
+.reveal-card>.product-info{transition-delay:calc(var(--reveal-delay,0ms) + 700ms)}
+.reveal-card>.product-actions,.reveal-card>.card-extras{transition-delay:calc(var(--reveal-delay,0ms) + 800ms)}
 .reveal-card.is-visible>.product-image,.reveal-card.is-visible>.product-info,.reveal-card.is-visible>.product-actions,.reveal-card.is-visible>.card-extras,.reveal-card:has(:focus-visible)>div{opacity:1;transform:none}
 .reveal:has(:focus-visible),.reveal-card:has(:focus-visible)>div{transition:none}
+.reveal-card:has(:focus-visible) .watch-photo{transition:none}
 .entry-intro{position:fixed;inset:0;z-index:50;display:grid;place-items:center;background:#10100f;color:#f4ede1;pointer-events:none;animation:entry-cover 1.9s ease both}
 .entry-wordmark{font-family:"Bodoni Moda",Didot,"Bodoni MT",Georgia,serif;font-size:clamp(38px,7vw,90px);font-weight:400;letter-spacing:.16em;line-height:1.1;padding-left:.16em;animation:entry-wordmark 1.9s cubic-bezier(.2,.65,.3,1) both}
 .entry-playing .hero-copy h1{animation:entry-collection 1s .9s ease both}
@@ -160,6 +166,8 @@ dialog::backdrop{background:#0008}
   .entry-intro{display:none}
   .entry-playing .hero-copy h1{animation:none}
   .reveal-card>.product-image,.reveal-card>.product-info,.reveal-card>.product-actions,.reveal-card>.card-extras{opacity:1;transform:none;transition:none}
+  .reveal-card .watch-photo{opacity:1;transition:none}
+  .product-image .watch-backdrop,.product-image .watch-context{display:none}
 }
 
 .music-controls{position:relative;display:flex;align-items:center;color:inherit}
@@ -373,3 +381,5 @@ select:focus-visible,textarea:focus-visible,summary:focus-visible{outline:2px so
 .checkout-accessory h4{font-size:14px;font-weight:500;margin:0 0 8px}.checkout-accessory p{font-size:13px;margin:0}
 .checkout-accessory .outline-button{padding:10px 12px;min-height:44px}
 @media(max-width:360px){.checkout-accessory{grid-template-columns:52px minmax(0,1fr) auto;gap:8px}.checkout-accessory img{width:52px;height:52px}}
+
+
