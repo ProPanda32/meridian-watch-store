@@ -229,7 +229,7 @@ select:focus-visible,textarea:focus-visible,summary:focus-visible{outline:2px so
 .outline-button:disabled{opacity:.45}
 .text-button{background:none;border:0;color:inherit;padding:8px 0;min-height:44px;text-decoration:underline;text-underline-offset:4px;font-size:13px}
 .collection-tools{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;margin:0 0 20px}
-.collection-tools span{margin-left:6px;font-variant-numeric:tabular-nums}
+.collection-tools span:not(.desktop-tool-label){margin-left:6px;font-variant-numeric:tabular-nums}
 .collection-filters{padding:8px 0 20px;margin:0}
 .filter-main{display:grid;grid-template-columns:minmax(0,1fr) minmax(180px,260px);gap:20px}
 .collection-filters label,.discount-form label{display:block;font-size:12px;color:#51564f}
@@ -339,7 +339,7 @@ select:focus-visible,textarea:focus-visible,summary:focus-visible{outline:2px so
 .sort-filter-dropdown{border-bottom:1px solid var(--line)}
 .sort-filter-dropdown .collection-filters{padding-top:16px}
 #collection-results{margin:12px 0 20px}
-@media(max-width:600px){.collection-toolbar{gap:6px}.collection-toolbar .collection-tools{gap:4px}.collection-toolbar .outline-button{padding:8px;font-size:12px}.filter-toggle{gap:6px;font-size:12px}.desktop-tool-label{display:none}.collection-toolbar .collection-tools span{margin-left:3px}}
+@media(max-width:600px){.collection-toolbar{gap:6px}.collection-toolbar .collection-tools{gap:4px}.collection-toolbar .outline-button{padding:8px;font-size:12px}.filter-toggle{gap:6px;font-size:12px}.desktop-tool-label{display:none}.collection-toolbar .collection-tools span:not(.desktop-tool-label){margin-left:3px}}
 
 /* Brand story pages */
 .story-header{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:26px 5%;border-bottom:1px solid var(--line)}
