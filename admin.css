@@ -2,3 +2,52 @@
 
 .mode-bar{display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding:16px 4%;border-bottom:1px solid #d7ddd4}.mode-bar button{padding:9px 15px;background:white;border:1px solid #bdc7b6}.mode-bar span{font-size:14px;color:#65715e}
 .login-screen{padding:45px 20px;max-width:530px;margin:auto}.login-screen h1{font-size:34px}#demo-logout{margin-left:16px}
+/* Keep mobile controls and data within the viewport, with comfortable touch targets. */
+@media(max-width:600px){
+  header{padding:18px 16px;gap:12px;align-items:flex-start;flex-wrap:wrap}
+  header>div{display:flex;flex-direction:column;align-items:flex-start;gap:8px;min-width:0}
+  header>div:last-child{align-items:flex-end;margin-left:auto}
+  header span{margin-top:0;font-size:12px}
+  header a:not(.brand){font-size:13px}
+  .brand{font-size:22px;letter-spacing:3px}
+  #demo-logout{margin-left:0;min-height:44px}
+  .preview{padding:12px 16px;font-size:13px}
+  .layout{display:block;min-width:0}
+  .layout>nav{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));padding:12px;gap:4px;border-bottom:1px solid #d7ddd4}
+  .layout>nav button{min-width:0;min-height:44px;padding:10px 4px;text-align:center;font-size:14px}
+  main{padding:24px 16px;width:100%}
+  h1{font-size:32px;margin-bottom:20px}
+  h2{font-size:22px}
+  .panel{padding:16px;margin-bottom:18px;min-width:0}
+  .metrics{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:20px 0}
+  .metric{padding:16px 12px;min-width:0}
+  .metric span{font-size:12px;line-height:1.4}
+  .metric strong{font-size:25px;overflow-wrap:anywhere}
+  .filters{display:grid;grid-template-columns:minmax(0,1fr);gap:0;margin:20px 0}
+  .filters label:first-child,.filters label:last-child{min-width:0}
+  input,select,textarea{min-width:0;max-width:100%;font-size:16px}
+  .form-row{grid-template-columns:minmax(0,1fr);gap:0}
+  .product{grid-template-columns:64px minmax(0,1fr);padding:14px;gap:10px 14px}
+  .product img{width:64px;height:80px;grid-row:span 2}
+  .product h2{font-size:20px;overflow-wrap:anywhere}
+  .product button{grid-column:2;min-height:44px;padding:8px 14px}
+  .stock-row{flex-wrap:wrap;gap:4px 12px}
+  .stock-row span:first-child{overflow-wrap:anywhere}
+  .table-scroll{overflow:visible}
+  table{white-space:normal;display:block}
+  thead{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+  tbody{display:grid;gap:16px}
+  tbody tr{display:block;padding-bottom:16px;border-bottom:1px solid #dce1d7}
+  tbody tr:last-child{border-bottom:0;padding-bottom:0}
+  td{display:grid;grid-template-columns:72px minmax(0,1fr);gap:12px;align-items:start;padding:7px 0;border:0;overflow-wrap:anywhere}
+  td::before{content:attr(data-label);font-size:12px;color:#65715e;padding-top:2px}
+  td .status,td button{justify-self:start;max-width:100%}
+  td button{min-height:44px}
+  dialog{width:calc(100% - 24px);max-height:calc(100dvh - 24px);padding:20px 16px;overflow-wrap:anywhere}
+  .dialog-heading{gap:12px;align-items:flex-start}
+  .dialog-heading h2{min-width:0;font-size:22px}
+  .dialog-heading button{flex:0 0 44px;min-height:44px}
+  dialog .primary,#settings-form .primary,.login-screen .primary{width:100%;min-height:44px}
+  .login-screen{padding:24px 16px}
+  .login-screen h1{font-size:30px}
+}
