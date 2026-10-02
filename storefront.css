@@ -20,7 +20,7 @@ button:disabled{cursor:not-allowed}
 .site-header #bag-count{background:color-mix(in srgb,#fff,var(--ink) calc(var(--header-blend)*100%));color:color-mix(in srgb,var(--ink),#fff calc(var(--header-blend)*100%));text-shadow:none}
 .logo{font-family:"Bodoni Moda",Didot,"Bodoni MT",Georgia,serif;font-optical-sizing:auto;font-size:34px;font-weight:400;letter-spacing:.14em;line-height:1.1;overflow-wrap:anywhere}
 .site-header .logo{max-width:340px;text-align:center}
-.header-start,.header-end{display:flex;align-items:center;gap:28px;min-width:0;font-size:13px}
+.header-start,.header-end{display:flex;align-items:center;gap:28px;min-width:0;font-size:.9375rem}
 .header-end{justify-content:flex-end}
 .nav-control{display:inline-flex;align-items:center;justify-content:center;gap:12px;border:0;background:transparent;padding:0;min-width:44px;min-height:44px;color:inherit}
 .nav-control:hover,.perspective-link:hover{opacity:.6}
