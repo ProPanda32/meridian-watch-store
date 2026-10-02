@@ -383,3 +383,6 @@ select:focus-visible,textarea:focus-visible,summary:focus-visible{outline:2px so
 @media(max-width:360px){.checkout-accessory{grid-template-columns:52px minmax(0,1fr) auto;gap:8px}.checkout-accessory img{width:52px;height:52px}}
 
 
+
+.checkout-accessory .bag-controls{width:112px;flex:none}
+@media(max-width:600px){.checkout-accessory{grid-template-columns:64px minmax(0,1fr)}.checkout-accessory .bag-controls{grid-column:2}.checkout-accessory img{grid-row:1 / span 2}}

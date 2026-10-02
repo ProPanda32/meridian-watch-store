@@ -120,7 +120,7 @@ function render(){state=store.load();document.title=state.settings.name+' | Time
 }
 function bagStepper(product){
   const quantity=product.stock>0?(bag.get(product.id)||0):0;
-  return `<div class="bag-controls" data-bag-controls="${product.id}"><button class="bag-add-button" data-add="${product.id}" ${quantity?'hidden':''} ${product.stock?'':'disabled'}>${product.stock?'Add to bag':'Sold out'}</button><div class="bag-stepper" ${quantity?'':'hidden'} role="group" aria-label="${esc(product.name)} bag quantity"><button data-decrease="${product.id}" aria-label="Remove one ${esc(product.name)} from bag" ${quantity?'':'disabled'}>−</button><span data-bag-quantity="${product.id}" aria-label="${quantity} in bag">${quantity}</span><button data-add="${product.id}" aria-label="Add one ${esc(product.name)} to bag" ${quantity>=product.stock?'disabled':''}>+</button></div></div>`;
+  return `<div class="bag-controls" data-bag-controls="${product.id}"><button type="button" class="bag-add-button" data-add="${product.id}" ${quantity?'hidden':''} ${product.stock?'':'disabled'}>${product.stock?'Add to bag':'Sold out'}</button><div class="bag-stepper" ${quantity?'':'hidden'} role="group" aria-label="${esc(product.name)} bag quantity"><button type="button" data-decrease="${product.id}" aria-label="Remove one ${esc(product.name)} from bag" ${quantity?'':'disabled'}>−</button><span data-bag-quantity="${product.id}" aria-label="${quantity} in bag">${quantity}</span><button type="button" data-add="${product.id}" aria-label="Add one ${esc(product.name)} to bag" ${quantity>=product.stock?'disabled':''}>+</button></div></div>`;
 }
 function removeOneFromBag(id){
   const quantity=bag.get(id)||0;
@@ -227,16 +227,19 @@ function renderDiscount(){
   $('discount-status').textContent=discountCode?`${discountCode} applied. You save ${money(totals.discount)}.`:'Try WELCOME10 (10%) or MERLOCK15 (15%).';
 }
 let accessorySuggestionSignature;
+const checkoutAccessoryIds=new Set();
 function renderAccessorySuggestions(){
-  const products=shop.recommendations(state.products,bag),signature=JSON.stringify(products);
+  for(const product of shop.recommendations(state.products,bag))checkoutAccessoryIds.add(product.id);
+  for(const product of state.products)if(product.category==='accessory'&&bag.has(product.id))checkoutAccessoryIds.add(product.id);
+  const products=state.products.filter(p=>p.active&&p.category==='accessory'&&checkoutAccessoryIds.has(p.id)),signature=JSON.stringify(products);
   $('checkout-accessories').hidden=!products.length;
-  if(signature!==accessorySuggestionSignature){accessorySuggestionSignature=signature;$('checkout-accessory-items').innerHTML=products.map(p=>`<article class="checkout-accessory"><img src="${esc(p.image)}" alt="${esc(p.name)}" width="64" height="64"><div><h4>${esc(p.name)}</h4><p>${money(p.price)}</p></div><button class="outline-button" type="button" data-add="${p.id}" aria-label="Add ${esc(p.name)} to bag">Add</button></article>`).join('');}
+  if(signature!==accessorySuggestionSignature){accessorySuggestionSignature=signature;$('checkout-accessory-items').innerHTML=products.map(p=>`<article class="checkout-accessory"><img src="${esc(p.image)}" alt="${esc(p.name)}" width="64" height="64"><div><h4>${esc(p.name)}</h4><p>${money(p.price)}</p></div>${bagStepper(p)}</article>`).join('');}
 }
 function renderCheckout(){
   renderAccessorySuggestions();
   const totals=bagQuote(),shipping=store.deliveryMethods[$('checkout-form').elements.deliveryMethod.value];$('checkout-summary').innerHTML=bagItems().map(({product:p,quantity:q})=>`<p>${esc(p.name)} × ${q} — ${money(p.price*q)}</p>`).join('')+`<div class="summary-line"><span>Subtotal</span><span>${money(totals.subtotal)}</span></div>${discountCode?`<div class="summary-line"><span>${esc(discountCode)}</span><span>−${money(totals.discount)}</span></div>`:''}<div class="summary-line"><span>${esc(shipping.label)}</span><span>${money(shipping.fee)}</span></div><div class="total"><strong>Total</strong><strong>${money(totals.total+shipping.fee)}</strong></div>`;$('place-order').disabled=!bag.size;
 }
-function startCheckout(){render();if(!bag.size)return;$('bag-dialog').close();$('checkout-error').textContent='';renderCheckout();$('checkout-dialog').showModal();}
+function startCheckout(){checkoutAccessoryIds.clear();accessorySuggestionSignature=undefined;render();if(!bag.size)return;$('bag-dialog').close();$('checkout-error').textContent='';renderCheckout();$('checkout-dialog').showModal();}
 document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.details)showDetails(b.dataset.details);if(b.dataset.add)addToBag(b.dataset.add);if(b.dataset.decrease)removeOneFromBag(b.dataset.decrease);if(b.dataset.remove){bag.delete(b.dataset.remove);renderBag();}if(b.dataset.quantity){state=store.load();const p=state.products.find(p=>p.id===b.dataset.quantity);if(!p)return;const q=(bag.get(p.id)||0)+Number(b.dataset.delta);if(q<=0)bag.delete(p.id);else bag.set(p.id,Math.min(q,p.stock));renderBag();}});
 $('checkout-form').addEventListener('change',e=>{if(e.target.name==='deliveryMethod')renderCheckout();});
 $('checkout-form').addEventListener('submit',e=>{e.preventDefault();const f=e.currentTarget;if(!f.reportValidity())return;$('place-order').disabled=true;try{const order=store.createOrder({customer:f.elements.customer.value,email:f.elements.email.value,paymentStatus:'Demo — no payment',source:'Storefront',discountCode,paymentMethod:f.elements.paymentMethod.value,delivery:{method:f.elements.deliveryMethod.value,addressLine1:f.elements.addressLine1.value,addressLine2:f.elements.addressLine2.value,city:f.elements.city.value,postalCode:f.elements.postalCode.value,country:f.elements.country.value,instructions:f.elements.deliveryInstructions.value},items:[...bag].map(([productId,quantity])=>({productId,quantity}))});bag.clear();discountCode='';writePreference(couponKey,'');render();$('checkout-dialog').close();$('confirmation-text').textContent=order.id+' · '+money(store.orderTotal(order))+' — saved to the admin Orders page.';$('confirmation-track').dataset.order=order.id;writePreference('merlock-last-order-v1',{id:order.id,email:order.email});$('confirmation-dialog').showModal();}catch(err){$('checkout-error').textContent=err.message;$('place-order').disabled=!bag.size;}});
