@@ -268,7 +268,7 @@ select:focus-visible,textarea:focus-visible,summary:focus-visible{outline:2px so
 .faq-list details{border-top:1px solid var(--line)}
 .faq-list details:last-child{border-bottom:1px solid var(--line)}
 .faq-list summary{padding:22px 0;cursor:pointer;font-size:16px;line-height:1.5}
-.faq-list p{max-width:720px;margin:0 0 24px;line-height:1.8;font-size:14px;color:#5a635a}
+.faq-list p{max-width:none;margin:0 0 24px;line-height:1.8;font-size:14px;color:#5a635a}
 .tracking-actions{display:flex;gap:10px;flex-wrap:wrap}
 .tracking-summary{margin-top:28px;border-top:1px solid var(--line);padding-top:16px}
 .tracking-summary h3{font-size:18px;overflow-wrap:anywhere}
