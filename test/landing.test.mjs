@@ -4,7 +4,7 @@ import {readFileSync} from 'node:fs';
 import vm from 'node:vm';
 
 const source=readFileSync(new URL('../landing.js',import.meta.url),'utf8');
-function page({reduced=false,observers=true,hash='',columns=3}={}){
+function page({reduced=false,observers=true,hash='',columns=3,layerLoading=false}={}){
   function element(tagName='DIV'){
     const classes=new Set(),events=new Map(),properties={};
     const child={setAttribute(){},textContent:'MERLOCK'};
@@ -22,6 +22,8 @@ function page({reduced=false,observers=true,hash='',columns=3}={}){
   hero.offsetHeight=1000;
   const video=ids.get('hero-video');video.paused=true;video.play=()=>{video.paused=false;return Promise.resolve();};video.pause=()=>video.paused=true;
   ids.get('products').children=Array.from({length:6},()=>element('ARTICLE'));
+  const pictures=layerLoading?[element('IMG'),element('IMG'),element('IMG')]:[];
+  ids.get('products').children[0].querySelectorAll=()=>pictures;
   const document=element();Object.assign(document,{documentElement:root,hidden:false,
     getElementById:id=>ids.get(id),
     querySelector:s=>({'.hero':hero,'.hero-stage':stage,'.hero-copy':copy,'.site-header':header})[s],
@@ -35,7 +37,7 @@ function page({reduced=false,observers=true,hash='',columns=3}={}){
   vm.runInNewContext(source,{document,window,location:{hash},CSS:{supports:()=>false},
     IntersectionObserver:IO,MutationObserver:MO,getComputedStyle:()=>({gridTemplateColumns:Array(columns).fill('300px').join(' ')}),
     requestAnimationFrame:fn=>{fn();return 0;},setTimeout:fn=>{timers.set(++timerId,fn);return timerId;},clearTimeout:id=>timers.delete(id)});
-  return {ids,root,text,window,motion,document,intersections,mutations,timers,element};
+  return {ids,root,text,window,motion,document,intersections,mutations,timers,element,pictures};
 }
 test('opening cover fades independently of video loading and has a timed escape',()=>{
   const p=page(),intro=p.ids.get('entry-intro');
@@ -73,4 +75,13 @@ test('reduced motion, anchored links and missing observers keep content availabl
   const p=page();p.motion.matches=true;p.motion.emit('change');
   assert.ok(p.ids.get('entry-intro').removed);
   for(const card of p.ids.get('products').children)assert.ok(card.classList.contains('is-visible'));
+});
+test('watch fade waits for all image layers instead of finishing before a slow photo loads',async()=>{
+  const p=page({layerLoading:true}),card=p.ids.get('products').children[0];
+  const flush=()=>new Promise(resolve=>setImmediate(resolve));
+  await flush();assert.ok(!card.classList.contains('watch-ready'));
+  p.pictures[0].emit('load');p.pictures[1].emit('load');
+  await flush();assert.ok(!card.classList.contains('watch-ready'));
+  p.pictures[2].emit('load');
+  await flush();assert.ok(card.classList.contains('watch-ready'));
 });
