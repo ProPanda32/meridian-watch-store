@@ -18,8 +18,8 @@ test('invalid or unavailable checkout does not create an order or change stock',
   assert.throws(()=>b.store.createOrder({customer:'Test',email:'invalid',items:[{productId:'noir',quantity:1}]}));assert.equal(JSON.stringify(b.store.load()),initial);
   const state=b.store.load();state.products[0].active=false;b.store.save(state);assert.throws(()=>b.store.createOrder({customer:'Test',email:'test@example.com',items:[{productId:'noir',quantity:1}]}));
 });
-test('failed storage reports failure and does not claim checkout success',()=>{const b=browser(new Map(),true);assert.throws(()=>b.store.createOrder({customer:'Test',email:'test@example.com',items:[{productId:'noir',quantity:1}]}),/could not save/);assert.equal(b.store.load().orders.length,3);});
-test('checkout checks the latest shared stock before saving',()=>{const b=browser(),other=browser(b.storage);other.store.createOrder({customer:'Test A',email:'a@example.com',items:[{productId:'emerald-gold',quantity:10}]});assert.throws(()=>b.store.createOrder({customer:'Test B',email:'b@example.com',items:[{productId:'emerald-gold',quantity:1}]}),/insufficient stock/);assert.equal(b.store.load().orders.length,4);});
+test('failed storage reports failure and does not claim checkout success',()=>{const b=browser(new Map(),true),initialCount=b.store.load().orders.length;assert.throws(()=>b.store.createOrder({customer:'Test',email:'test@example.com',items:[{productId:'noir',quantity:1}]}),/could not save/);assert.equal(b.store.load().orders.length,initialCount);});
+test('checkout checks the latest shared stock before saving',()=>{const b=browser(),other=browser(b.storage),initialCount=b.store.load().orders.length;other.store.createOrder({customer:'Test A',email:'a@example.com',items:[{productId:'emerald-gold',quantity:10}]});assert.throws(()=>b.store.createOrder({customer:'Test B',email:'b@example.com',items:[{productId:'emerald-gold',quantity:1}]}),/insufficient stock/);assert.equal(b.store.load().orders.length,initialCount+1);});
 test('stock imagery migrates without losing browser orders or admin edits',()=>{
   const b=browser(),state=b.store.load();
   state.products[0].image='https://images.unsplash.com/photo-1630512731371-a3747ab932ed?auto=format&fit=crop&w=1000&q=85';
@@ -122,4 +122,13 @@ test('music settings persist across store edits and reject unsupported audio URL
   }
   const reset=b.store.load();reset.settings.musicUrl='';b.store.save(reset);
   assert.equal(b.store.load().settings.musicUrl,'');
+});
+
+test('demo trend history migrates once without changing saved orders, stock or settings',()=>{
+  const b=browser(),state=b.store.load();state.orders=state.orders.filter(o=>!o.id.startsWith('DEMO-TREND-'));delete state.trendOrdersAdded;
+  state.products[0].stock=2;state.settings.name='Custom store';const original=JSON.stringify(state.orders);b.store.save(state);
+  const migrated=b.store.load();assert.equal(migrated.orders.filter(o=>o.id.startsWith('DEMO-TREND-')).length,51);
+  assert.equal(JSON.stringify(migrated.orders.filter(o=>!o.id.startsWith('DEMO-TREND-'))),original);
+  assert.equal(migrated.products[0].stock,2);assert.equal(migrated.settings.name,'Custom store');
+  b.store.save(migrated);assert.equal(b.store.load().orders.length,migrated.orders.length);
 });

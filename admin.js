@@ -13,8 +13,28 @@ function render(){document.querySelector('.brand').textContent=state.settings.na
   $('recent-orders').innerHTML=orderTable(state.orders.slice(0,5));renderOrders();
   const low=state.products.filter(p=>p.stock<=5);$('low-stock').innerHTML=low.length?low.map(p=>`<div class="stock-row"><button class="stock-link" data-stock-product="${esc(p.id)}" aria-label="Update stock for ${esc(p.name)}">${esc(p.name)}</button><span>${stockTag(p)} ${p.stock} remaining</span></div>`).join(''):'<p>All products have more than five units in stock.</p>';
   $('product-list').innerHTML=state.products.map(p=>`<article class="product"><img src="${esc(p.image)}" alt="${esc(p.name)}"><div><h2>${esc(p.name)}</h2><p>${money(p.price)} · ${p.stock} in stock · ${p.active?'Visible':'Hidden'}</p>${stockTag(p)}</div><button data-product="${esc(p.id)}">Edit product</button></article>`).join('');
+  renderAnalysis();
   const f=$('settings-form');f.elements.name.value=state.settings.name;f.elements.announcement.value=state.settings.announcement;f.elements.musicChoice.value=state.settings.musicUrl?'custom':'default';f.elements.musicUrl.value=state.settings.musicUrl||'';syncMusicSettings();
 }
+function monthLabel(key){return new Intl.DateTimeFormat('en-GB',{month:'short',year:'numeric',timeZone:'UTC'}).format(new Date(key+'-01T00:00:00Z'));}
+function renderBestSellers(){
+  const month=$('analysis-month').value;
+  const results=window.MerlockAnalytics.analyse(state.orders.filter(o=>!month||o.date.startsWith(month))).products;
+  const max=results[0]?.units||1;
+  $('best-sellers').innerHTML=results.length?results.map((p,i)=>`<div class="seller-row"><div><strong>${i+1}. ${esc(p.name)}</strong><span class="muted">${p.units} units · ${money(p.revenue)}</span></div><div class="sales-track" aria-hidden="true"><span style="width:${p.units/max*100}%"></span></div></div>`).join(''):'<p>No sales recorded for this month.</p>';
+}
+function renderAnalysis(){
+  const stats=window.MerlockAnalytics.analyse(state.orders);
+  $('analysis-metrics').innerHTML=[['Recorded order value',money(stats.revenue)],['Orders',stats.orders],['Watches sold',stats.units],['Average order value',money(stats.average)]].map(([label,value])=>`<div class="metric"><span>${label}</span><strong>${value}</strong></div>`).join('');
+  const max=Math.max(1,...stats.months.map(m=>m.revenue));
+  $('monthly-chart').innerHTML=stats.months.length?stats.months.map(m=>`<div class="month-bar"><span>${monthLabel(m.key)}</span><div class="sales-track" aria-hidden="true"><span style="width:${m.revenue/max*100}%"></span></div><strong>${money(m.revenue)}</strong></div>`).join(''):'<p>No sales recorded yet.</p>';
+  $('monthly-comparison').innerHTML=stats.months.length?`<table role="table"><thead><tr><th>Month</th><th>Order value</th><th>Orders</th><th>Units</th><th>Monthly difference</th></tr></thead><tbody>${stats.months.map(m=>`<tr role="row"><td role="cell" data-label="Month">${monthLabel(m.key)}</td><td role="cell" data-label="Value">${money(m.revenue)}</td><td role="cell" data-label="Orders">${m.orders}</td><td role="cell" data-label="Units">${m.units}</td><td role="cell" data-label="Change">${m.difference===null?'—':`${m.difference>0?'+':''}${money(m.difference)}${m.change===null?'':` (${m.change>0?'+':''}${m.change.toFixed(1)}%)`}`}</td></tr>`).join('')}</tbody></table>`:'';
+  const selected=$('analysis-month').value;
+  $('analysis-month').innerHTML='<option value="">All months</option>'+stats.months.map(m=>`<option value="${m.key}">${monthLabel(m.key)}</option>`).join('');
+  if(stats.months.some(m=>m.key===selected))$('analysis-month').value=selected;
+  renderBestSellers();
+}
+$('analysis-month').addEventListener('change',renderBestSellers);
 function editProduct(id){const p=id?state.products.find(p=>p.id===id):{id:'',name:'',style:'',price:0,stock:0,image:'',description:'',badge:'',active:true};if(!p)return;const f=$('product-form');for(const k of ['id','name','style','price','stock','image','description','badge'])f.elements[k].value=p[k];f.elements.active.checked=p.active;$('product-dialog-title').textContent=id?'Edit product':'Add product';$('product-error').textContent='';$('remove-product').hidden=!id;$('product-dialog').showModal();}
 function viewOrder(id){const o=state.orders.find(o=>o.id===id);if(!o)return;const f=$('order-form');f.elements.id.value=id;f.elements.status.value=o.status;f.elements.paymentStatus.value=o.paymentStatus||'Unpaid';f.elements.notes.value=o.notes;$('order-dialog-title').textContent=o.id;$('order-error').textContent='';$('order-details').innerHTML=`<p>${esc(o.customer)}<br>${esc(o.email)}<br>${esc(o.date)}<br>Payment: ${esc(o.paymentStatus||'Sample')}<br>Source: ${esc(o.source||'Sample')}</p>${o.items.map(i=>`<p>${esc(i.name)} × ${i.quantity} — ${money(i.unitPrice*i.quantity)}</p>`).join('')}<p><strong>Total: ${money(store.orderTotal(o))}</strong></p><p class="muted">Original order prices stay unchanged when you edit product prices.</p>`;$('order-dialog').showModal();}
 document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.view){for(const s of document.querySelectorAll('main>section'))s.hidden=s.id!==b.dataset.view;for(const n of document.querySelectorAll('nav button'))n.removeAttribute('aria-current');b.setAttribute('aria-current','page');$('notice').textContent='';}if(b.dataset.stockProduct){document.querySelector('[data-view=products]').click();editProduct(b.dataset.stockProduct);$('product-form').elements.stock.focus();}if(b.dataset.product)editProduct(b.dataset.product);if(b.dataset.order)viewOrder(b.dataset.order);if(b.dataset.close)$(b.dataset.close).close();});

@@ -20,6 +20,17 @@
       {id:'DEMO-1001',date:'2026-09-29',customer:'Sample customer C',email:'customer-c@example.com',status:'Delivered',items:[{productId:'noir',name:'The Aurelia',quantity:1,unitPrice:185}],notes:''}
     ]
   };
+  // Historical sample orders illustrate trends without changing live demo stock.
+  const trendOrders=[];
+  [5,8,6,10,13,9].forEach((count,monthIndex)=>{
+    for(let i=0;i<count;i++){
+      const product=defaults.products[i%3===0?0:(i+monthIndex)%defaults.products.length];
+      trendOrders.push({id:`DEMO-TREND-${monthIndex+4}-${i+1}`,date:`2026-${String(monthIndex+4).padStart(2,'0')}-${String(2+i*2).padStart(2,'0')}`,customer:`Sample trend customer ${monthIndex+1}-${i+1}`,email:`trend-${monthIndex+1}-${i+1}@example.com`,status:i===count-1?'Cancelled':'Delivered',paymentStatus:'Demo — no payment',source:'Sample history',items:[{productId:product.id,name:product.name,quantity:i%4===0?2:1,unitPrice:product.price}],notes:'Historical demo order for analysis. No payment or stock movement.'});
+    }
+  });
+  defaults.orders.push(...trendOrders);
+  defaults.orders.sort((a,b)=>b.date.localeCompare(a.date));
+  defaults.trendOrdersAdded=true;
   const legacyProducts = [{"id": "noir", "image": "https://images.unsplash.com/photo-1630512731371-a3747ab932ed?auto=format&fit=crop&w=1000&q=85", "style": "Black leather \u00b7 Gold tone", "description": "A dark dial, warm gold tones and a classic leather strap. A refined companion for evenings and everyday wear."}, {"id": "silver", "image": "https://images.unsplash.com/photo-1630512731154-ed3afce20505?auto=format&fit=crop&w=1000&q=85", "style": "Black leather \u00b7 Silver tone", "description": "A crisp silver-tone case and a pared-back black dial. Understated style with a versatile monochrome palette."}];
   const previousCatalogue = [{"id": "noir", "name": "The Noir", "description": "An engraved champagne-gold bracelet and a starry midnight dial with a moonphase-inspired detail. A celestial expression of understated luxury."}, {"id": "silver", "name": "The Silver", "description": "A white and gold-tone bracelet frames a midnight-blue celestial dial. A crisp, considered palette with a moonphase-inspired detail."}];
   const copy = v => JSON.parse(JSON.stringify(v));
@@ -77,6 +88,12 @@
           if (!state.products.some(existing=>existing.id===product.id)) state.products.push(copy(product));
         }
         state.dressAndSportCollectionAdded=true;
+      }
+      if(!state.trendOrdersAdded){
+        const existing=new Set(state.orders.map(o=>o.id));
+        state.orders.push(...copy(trendOrders.filter(o=>!existing.has(o.id))));
+        state.orders.sort((a,b)=>b.date.localeCompare(a.date));
+        state.trendOrdersAdded=true;
       }
       return copy(state); }
     catch { return copy(defaults); }
