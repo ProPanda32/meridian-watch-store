@@ -10,7 +10,7 @@ You can also host the files on a static website service. Serve both pages at the
 
 1. Add watches to the bag.
 2. Choose **Demo checkout**, use fictional details, and select **Place demo order**.
-3. Use **Admin sign-in** in the storefront footer, or the confirmation's dashboard link.
+3. Track the sample order from its confirmation, or use **Admin sign-in** in the storefront footer.
 4. Sign in using username **owner** and password **MerlockDemo123!**.
 5. Open **Orders**. Your storefront order appears alongside sample orders.
 
@@ -30,7 +30,7 @@ The login flow is intentionally browser-based with public demo credentials. It i
 - Admin order search, status filtering, fulfilment status, payment records and notes.
 - Product price, stock, name, image, description and visibility editing; add products.
 - Store name and announcement settings.
-- Three initial sample orders.
+- 54 initial sample orders spanning April–October 2026.
 - Original order price snapshots, independent of later product price changes.
 
 Checkout validates the latest stock and reduces inventory only after a successful save. Failed saves do not clear the bag or show a success confirmation. No payments are taken, no emails are sent, and no real orders are transmitted to a server.
@@ -45,16 +45,18 @@ The live workspace, login API, database and real-order backend have been removed
 
 ## Checks
 
-Run `node --test test/demo.test.mjs` for the data and checkout tests. These cover storefront-to-admin order persistence, order price snapshots, stock updates, invalid/unavailable items, duplicate items, latest-stock checks, failed-storage handling, imagery migration and catalogue copy migration. All six tests passed during recovery validation.
+Run `npm test` for the data, analytics, shopping, music-control and static-server regression tests. The suite covers checkout snapshots and stock, discounts, saved-bag validation, catalogue filters, historical demo-data migration, analysis calculations and CSV safety, reset behaviour, music fades and media delivery.
 
-`npm test` runs all 26 checkout, music-control and server tests, including landing assets, HTTP metadata, full video downloads, byte-range requests and the WebM alternative. All 26 tests pass, including removed-product migration and image-route removal.
+Browser verification also checks saved favourites and bags across refreshes, the three-watch comparison limit, gallery zoom and extra photos, discount checkout through tracking, filtered CSV downloads, reset cancellation/confirmation, and 320–1280px layouts. Those browser checks are separate from the Node test suite.
 
 ## Files
 
 - `index.html`, `storefront.css`, `storefront.js`: storefront and demo checkout
 - `landing.js`: film playback, scroll effects, navigation and product search
 - `admin.html`, `admin.css`, `admin.js`: dashboard and demo login
-- `store.js`: shared browser-local data and order creation
+- `store.js`: shared browser-local data, order creation, discounts and demo reset
+- `shop.js`: shared catalogue metadata, filters and saved-bag validation
+- `analytics.js`: sales calculations, date filtering and CSV formatting
 - `server.mjs`: optional static preview server
 - `test/demo.test.mjs`: shared checkout model tests
 - `test/server.test.mjs`: static assets and video streaming tests
@@ -120,4 +122,20 @@ Switching watch tabs uses a short fade-out followed by a gentle fade-and-slide i
 The shopping bag includes square watch thumbnails beside each item.
 
 
-Collection cards and product details now use compact minus/quantity/plus controls for bag quantities. Minus is disabled at zero; plus is disabled when the bag reaches available stock.
+Collection cards and product details show Add to bag at zero quantity and matching-size minus/quantity/plus controls after adding. Plus is disabled when the bag reaches available stock.
+
+## Shopping demo features
+
+- Search within the collection; filter by dial colour, strap, price and stock. Sorting offers featured, price, name and popularity from non-cancelled demo orders. Filters work alongside the themed tabs.
+- Save watches with the heart button. Open Saved watches above the collection or in the menu. Favourites and the bag persist in this browser; stock changes cap quantities and remove unavailable products.
+- Select two or three watches using Compare on each card, then open the comparison. Specifications are illustrative; they are not verified manufacturing or performance claims.
+- Product details include a full-watch view, a cropped dial view, tap-to-zoom and two clearly labelled fictional reviews. Admin product editing accepts up to six additional image URLs for the gallery. The bundled watches retain their original image; detail views use that image rather than inventing alternate photographs.
+- Apply WELCOME10 (10%) or MERLOCK15 (15%) in the bag. The checkout records the discount and original item prices, and admin/analysis display the discounted value. One code per order; no real promotion or payment is involved.
+- Track an order with its number and fictional email from the confirmation, menu or footer. Try sample order DEMO-1003, or use Advance demo status to simulate Processing → Shipped → Delivered. Changes also appear in admin; there is no carrier integration.
+- The brand story and FAQ explain the collection, demo checkout, saved watches, sample reviews and tracking.
+
+## Analysis and reset
+
+Analysis supports an inclusive date range, order-value/units/order-count charts, monthly differences, and best sellers filtered by month. Cancelled orders are excluded. Values include demo and unpaid orders, with recorded discounts deducted; they are not cash receipts. Monthly and product CSV exports respect the selected filters. Months without orders between the first and last month appear as zero values. Current or date-filtered months can be incomplete.
+
+Settings → Reset demo restores the twelve-watch catalogue, original stocks, sample order history and store settings, and clears saved watches, the bag, applied code and last order reference. A confirmation is required. Unrelated local-storage data and the current admin sign-in are retained. Export CSVs first if you want to keep the analysis.

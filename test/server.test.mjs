@@ -13,7 +13,7 @@ before(async()=>{
 after(async()=>{if(server?.listening)await new Promise(resolve=>server.close(resolve));});
 
 test('landing assets are served with browser-compatible content types',async()=>{
-  for(const [path,type] of [['/','text/html'],['/landing.js','text/javascript'],['/storefront.css','text/css'],['/assets/watches/landing-page-poster.webp','image/webp']]){
+  for(const [path,type] of [['/','text/html'],['/landing.js','text/javascript'],['/shop.js','text/javascript'],['/analytics.js','text/javascript'],['/storefront.css','text/css'],['/assets/watches/landing-page-poster.webp','image/webp']]){
     const response=await fetch(base+path);
     assert.equal(response.status,200);
     assert.ok(response.headers.get('content-type').startsWith(type));

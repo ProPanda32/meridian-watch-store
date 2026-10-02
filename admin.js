@@ -17,17 +17,22 @@ function render(){document.querySelector('.brand').textContent=state.settings.na
   const f=$('settings-form');f.elements.name.value=state.settings.name;f.elements.announcement.value=state.settings.announcement;f.elements.musicChoice.value=state.settings.musicUrl?'custom':'default';f.elements.musicUrl.value=state.settings.musicUrl||'';syncMusicSettings();
 }
 function monthLabel(key){return new Intl.DateTimeFormat('en-GB',{month:'short',year:'numeric',timeZone:'UTC'}).format(new Date(key+'-01T00:00:00Z'));}
+function analysisOrders(){return window.MerlockAnalytics.filterOrders(state.orders,{from:$('analysis-from').value,to:$('analysis-to').value});}
 function renderBestSellers(){
   const month=$('analysis-month').value;
-  const results=window.MerlockAnalytics.analyse(state.orders.filter(o=>!month||o.date.startsWith(month))).products;
+  const results=window.MerlockAnalytics.analyse(analysisOrders().filter(o=>!month||o.date.startsWith(month))).products;
   const max=results[0]?.units||1;
   $('best-sellers').innerHTML=results.length?results.map((p,i)=>`<div class="seller-row"><div><strong>${i+1}. ${esc(p.name)}</strong><span class="muted">${p.units} units · ${money(p.revenue)}</span></div><div class="sales-track" aria-hidden="true"><span style="width:${p.units/max*100}%"></span></div></div>`).join(''):'<p>No sales recorded for this month.</p>';
 }
 function renderAnalysis(){
-  const stats=window.MerlockAnalytics.analyse(state.orders);
+  const from=$('analysis-from').value,to=$('analysis-to').value;
+  $('analysis-error').textContent=from&&to&&from>to?'Choose an end date on or after the start date.':'';
+  const stats=window.MerlockAnalytics.analyse(analysisOrders());
   $('analysis-metrics').innerHTML=[['Recorded order value',money(stats.revenue)],['Orders',stats.orders],['Watches sold',stats.units],['Average order value',money(stats.average)]].map(([label,value])=>`<div class="metric"><span>${label}</span><strong>${value}</strong></div>`).join('');
-  const max=Math.max(1,...stats.months.map(m=>m.revenue));
-  $('monthly-chart').innerHTML=stats.months.length?stats.months.map(m=>`<div class="month-bar"><span>${monthLabel(m.key)}</span><div class="sales-track" aria-hidden="true"><span style="width:${m.revenue/max*100}%"></span></div><strong>${money(m.revenue)}</strong></div>`).join(''):'<p>No sales recorded yet.</p>';
+  const measure=$('analysis-measure').value;
+  const max=Math.max(1,...stats.months.map(m=>m[measure]));
+  const format=value=>measure==='revenue'?money(value):`${value} ${measure==='units'?'watches':'orders'}`;
+  $('monthly-chart').innerHTML=stats.months.length?stats.months.map(m=>`<div class="month-bar"><span>${monthLabel(m.key)}</span><div class="sales-track" aria-hidden="true"><span style="width:${m[measure]/max*100}%"></span></div><strong>${format(m[measure])}</strong></div>`).join(''):'<p>No sales recorded in this date range.</p>';
   $('monthly-comparison').innerHTML=stats.months.length?`<table role="table"><thead><tr><th>Month</th><th>Order value</th><th>Orders</th><th>Units</th><th>Monthly difference</th></tr></thead><tbody>${stats.months.map(m=>`<tr role="row"><td role="cell" data-label="Month">${monthLabel(m.key)}</td><td role="cell" data-label="Value">${money(m.revenue)}</td><td role="cell" data-label="Orders">${m.orders}</td><td role="cell" data-label="Units">${m.units}</td><td role="cell" data-label="Change">${m.difference===null?'—':`${m.difference>0?'+':''}${money(m.difference)}${m.change===null?'':` (${m.change>0?'+':''}${m.change.toFixed(1)}%)`}`}</td></tr>`).join('')}</tbody></table>`:'';
   const selected=$('analysis-month').value;
   $('analysis-month').innerHTML='<option value="">All months</option>'+stats.months.map(m=>`<option value="${m.key}">${monthLabel(m.key)}</option>`).join('');
@@ -35,8 +40,32 @@ function renderAnalysis(){
   renderBestSellers();
 }
 $('analysis-month').addEventListener('change',renderBestSellers);
-function editProduct(id){const p=id?state.products.find(p=>p.id===id):{id:'',name:'',style:'',price:0,stock:0,image:'',description:'',badge:'',active:true};if(!p)return;const f=$('product-form');for(const k of ['id','name','style','price','stock','image','description','badge'])f.elements[k].value=p[k];f.elements.active.checked=p.active;$('product-dialog-title').textContent=id?'Edit product':'Add product';$('product-error').textContent='';$('remove-product').hidden=!id;$('product-dialog').showModal();}
-function viewOrder(id){const o=state.orders.find(o=>o.id===id);if(!o)return;const f=$('order-form');f.elements.id.value=id;f.elements.status.value=o.status;f.elements.paymentStatus.value=o.paymentStatus||'Unpaid';f.elements.notes.value=o.notes;$('order-dialog-title').textContent=o.id;$('order-error').textContent='';$('order-details').innerHTML=`<p>${esc(o.customer)}<br>${esc(o.email)}<br>${esc(o.date)}<br>Payment: ${esc(o.paymentStatus||'Sample')}<br>Source: ${esc(o.source||'Sample')}</p>${o.items.map(i=>`<p>${esc(i.name)} × ${i.quantity} — ${money(i.unitPrice*i.quantity)}</p>`).join('')}<p><strong>Total: ${money(store.orderTotal(o))}</strong></p><p class="muted">Original order prices stay unchanged when you edit product prices.</p>`;$('order-dialog').showModal();}
+$('analysis-filters').addEventListener('change',renderAnalysis);
+$('analysis-filters').addEventListener('submit',event=>event.preventDefault());
+$('analysis-filters').addEventListener('reset',()=>setTimeout(renderAnalysis,0));
+function downloadCsv(filename,rows){
+  const blob=new Blob(['\uFEFF'+window.MerlockAnalytics.csv(rows)],{type:'text/csv;charset=utf-8'});
+  const url=URL.createObjectURL(blob),link=document.createElement('a');link.href=url;link.download=filename;
+  document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+$('export-months').addEventListener('click',()=>{
+  if($('analysis-error').textContent)return;
+  const stats=window.MerlockAnalytics.analyse(analysisOrders());
+  downloadCsv('merlock-monthly-analysis.csv',[['Month','Gross GBP','Discounts GBP','Net order value GBP','Orders','Units','Change GBP','Change percent'],...stats.months.map(m=>[m.key,m.gross.toFixed(2),m.discounts.toFixed(2),m.revenue.toFixed(2),m.orders,m.units,m.difference,m.change])]);
+});
+$('export-products').addEventListener('click',()=>{
+  if($('analysis-error').textContent)return;
+  const month=$('analysis-month').value;
+  const stats=window.MerlockAnalytics.analyse(analysisOrders().filter(o=>!month||o.date.startsWith(month)));
+  downloadCsv('merlock-product-analysis.csv',[['Product ID','Product','Units','Net order value GBP'],...stats.products.map(p=>[p.id,p.name,p.units,p.revenue.toFixed(2)])]);
+});
+$('reset-demo').addEventListener('click',()=>{
+  if(!window.confirm('Reset this demo? This replaces products, orders and settings and clears saved watches and the bag in this browser.'))return;
+  try{state=store.reset();for(const d of document.querySelectorAll('dialog'))d.close();$('analysis-filters').reset();$('order-search').value='';$('order-filter').value='';render();notify('Demo restored. Original catalogue, sample orders and settings are ready.');}
+  catch(error){notify(error.message,true);}
+});
+function editProduct(id){const p=id?state.products.find(p=>p.id===id):{id:'',name:'',style:'',price:0,stock:0,image:'',description:'',badge:'',active:true};if(!p)return;const f=$('product-form');for(const k of ['id','name','style','price','stock','image','description','badge'])f.elements[k].value=p[k];f.elements.active.checked=p.active;f.elements.galleryImages.value=(p.galleryImages||[]).join('\n');$('product-dialog-title').textContent=id?'Edit product':'Add product';$('product-error').textContent='';$('remove-product').hidden=!id;$('product-dialog').showModal();}
+function viewOrder(id){const o=state.orders.find(o=>o.id===id);if(!o)return;const f=$('order-form');f.elements.id.value=id;f.elements.status.value=o.status;f.elements.paymentStatus.value=o.paymentStatus||'Unpaid';f.elements.notes.value=o.notes;$('order-dialog-title').textContent=o.id;$('order-error').textContent='';$('order-details').innerHTML=`<p>${esc(o.customer)}<br>${esc(o.email)}<br>${esc(o.date)}<br>Payment: ${esc(o.paymentStatus||'Sample')}<br>Source: ${esc(o.source||'Sample')}</p>${o.items.map(i=>`<p>${esc(i.name)} × ${i.quantity} — ${money(i.unitPrice*i.quantity)}</p>`).join('')}${o.discountAmount?`<p>${esc(o.discountCode||'Discount')} — saved ${money(o.discountAmount)}</p>`:''}<p><strong>Total: ${money(store.orderTotal(o))}</strong></p><p class="muted">Original order prices stay unchanged when you edit product prices.</p>`;$('order-dialog').showModal();}
 document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.view){for(const s of document.querySelectorAll('main>section'))s.hidden=s.id!==b.dataset.view;for(const n of document.querySelectorAll('nav button'))n.removeAttribute('aria-current');b.setAttribute('aria-current','page');$('notice').textContent='';}if(b.dataset.stockProduct){document.querySelector('[data-view=products]').click();editProduct(b.dataset.stockProduct);$('product-form').elements.stock.focus();}if(b.dataset.product)editProduct(b.dataset.product);if(b.dataset.order)viewOrder(b.dataset.order);if(b.dataset.close)$(b.dataset.close).close();});
 $('new-product').addEventListener('click',()=>editProduct());$('order-search').addEventListener('input',renderOrders);$('order-filter').addEventListener('change',renderOrders);
 $('remove-product').addEventListener('click',()=>{
@@ -48,7 +77,7 @@ $('remove-product').addEventListener('click',()=>{
   try{commit(next);$('product-dialog').close();notify('Product removed. Existing orders were kept.');}
   catch(error){$('product-error').textContent=error.message;}
 });
-$('product-form').addEventListener('submit',async e=>{e.preventDefault();const f=e.currentTarget;if(!f.reportValidity())return;const next=store.load();const id=f.elements.id.value||`watch-${crypto.randomUUID()}`;const p={id,name:f.elements.name.value.trim(),style:f.elements.style.value.trim(),price:Number(f.elements.price.value),stock:Number(f.elements.stock.value),image:f.elements.image.value.trim(),description:f.elements.description.value.trim(),badge:f.elements.badge.value.trim(),active:f.elements.active.checked};const index=next.products.findIndex(p=>p.id===id);if(index<0)next.products.push(p);else next.products[index]=p;try{await commit(next);$('product-dialog').close();}catch(err){$('product-error').textContent=err.message;}});
+$('product-form').addEventListener('submit',async e=>{e.preventDefault();const f=e.currentTarget;if(!f.reportValidity())return;const next=store.load();const id=f.elements.id.value||`watch-${crypto.randomUUID()}`;const p={...next.products.find(product=>product.id===id),id,galleryImages:f.elements.galleryImages.value.split(/\r?\n/).map(url=>url.trim()).filter(Boolean),name:f.elements.name.value.trim(),style:f.elements.style.value.trim(),price:Number(f.elements.price.value),stock:Number(f.elements.stock.value),image:f.elements.image.value.trim(),description:f.elements.description.value.trim(),badge:f.elements.badge.value.trim(),active:f.elements.active.checked};const index=next.products.findIndex(p=>p.id===id);if(index<0)next.products.push(p);else next.products[index]=p;try{await commit(next);$('product-dialog').close();}catch(err){$('product-error').textContent=err.message;}});
 $('order-form').addEventListener('submit',async e=>{e.preventDefault();const f=e.currentTarget,next=store.load(),o=next.orders.find(o=>o.id===f.elements.id.value);if(!o){$('order-error').textContent='This order no longer exists.';return;}o.status=f.elements.status.value;o.paymentStatus=f.elements.paymentStatus.value;o.notes=f.elements.notes.value;try{await commit(next);$('order-dialog').close();}catch(err){$('order-error').textContent=err.message;}});
 function syncMusicSettings(){
   const custom=$('settings-form').elements.musicChoice.value==='custom';
@@ -81,5 +110,5 @@ window.addEventListener('meridian-store-change',()=>{state=store.load();render()
 const sessionKey='merlock-demo-owner';
 function showDashboard(){let signedIn=false;try{signedIn=sessionStorage.getItem(sessionKey)==='signed-in';}catch{}$('dashboard').hidden=!signedIn;$('login-screen').hidden=signedIn;$('demo-logout').hidden=!signedIn;if(signedIn){state=store.load();render();}}
 $('demo-login-form').addEventListener('submit',e=>{e.preventDefault();const f=e.currentTarget;if(f.elements.username.value.trim()!=='owner'||f.elements.password.value!=='MerlockDemo123!'){$('login-error').textContent='Incorrect demo username or password.';return;}try{sessionStorage.setItem(sessionKey,'signed-in');f.reset();$('login-error').textContent='';showDashboard();}catch{$('login-error').textContent='Enable session storage in your browser to use the demo login.';}});
-$('demo-logout').addEventListener('click',()=>{try{sessionStorage.removeItem(sessionKey);}catch{}for(const d of document.querySelectorAll('dialog'))d.close();showDashboard();});
+$('demo-logout').addEventListener('click',()=>{$('music-preview').pause();try{sessionStorage.removeItem(sessionKey);}catch{}for(const d of document.querySelectorAll('dialog'))d.close();showDashboard();});
 showDashboard();

@@ -50,6 +50,15 @@
       ids.add(p.id);
       for (const field of ['name','style','image','description','badge']) if(typeof p[field]!=='string' || p[field].length>2000) throw Error('Invalid product text.');
       if(!p.name.trim() || p.name.length>80 || !Number.isFinite(p.price) || p.price<0 || p.price>1000000 || Math.abs(p.price*100-Math.round(p.price*100))>0.000001 || !Number.isSafeInteger(p.stock) || p.stock<0 || p.stock>1000000 || typeof p.active!=='boolean') throw Error('Enter a valid price and whole-number stock level.');
+      if(p.galleryImages!==undefined){
+        if(!Array.isArray(p.galleryImages)||p.galleryImages.length>6)throw Error('Use up to six additional photo URLs.');
+        for(const image of p.galleryImages){
+          if(typeof image!=='string'||image.length>2000)throw Error('Use valid additional photo URLs.');
+          if(!/^assets\/watches\/[a-z0-9-]+\.webp$/.test(image)){
+            try{if(new URL(image).protocol!=='https:')throw Error();}catch{throw Error('Additional photos need HTTPS URLs or bundled watch image paths.');}
+          }
+        }
+      }
       if (!/^assets\/watches\/[a-z0-9-]+\.webp$/.test(p.image)) {
         const url=new URL(p.image); if(url.protocol!=='https:') throw Error('Use an HTTPS image URL or a bundled assets/watches/*.webp path.');
       }
@@ -57,6 +66,8 @@
     const orderIds=new Set();
     for(const o of s.orders) {
       if(!o || typeof o.id!=='string' || orderIds.has(o.id) || !statuses.includes(o.status) || typeof o.customer!=='string' || typeof o.email!=='string' || typeof o.date!=='string' || typeof o.notes!=='string' || o.notes.length>2000 || !Array.isArray(o.items)) throw Error('Invalid order.');
+      const subtotal=o.items.reduce((n,i)=>n+Math.round(i.unitPrice*100)*i.quantity,0);
+      if(o.discountAmount!==undefined&&(!Number.isFinite(o.discountAmount)||o.discountAmount<0||Math.round(o.discountAmount*100)>subtotal))throw Error('Invalid order discount.');
       orderIds.add(o.id);
       for(const i of o.items) if(typeof i.name!=='string' || !Number.isSafeInteger(i.quantity) || i.quantity<1 || !Number.isFinite(i.unitPrice) || i.unitPrice<0) throw Error('Invalid order item.');
     }
@@ -105,7 +116,7 @@
     window.dispatchEvent(new Event('meridian-store-change'));
     return copy(state);
   }
-  function createOrder({customer,email,items,paymentStatus='Unpaid',source='Admin'}) {
+  function createOrder({customer,email,items,paymentStatus='Unpaid',source='Admin',discountCode=''}) {
     if(typeof customer!=='string'||!customer.trim()||customer.trim().length>150||typeof email!=='string'||email.length>254||!/^\S+@\S+\.\S+$/.test(email)||!Array.isArray(items)||!items.length||items.length>100||!['Unpaid','Paid','Demo — no payment'].includes(paymentStatus)||!['Admin','Storefront'].includes(source))throw Error('Enter a name, valid email and order items.');
     const next=load(),seen=new Set();
     const snapshots=items.map(i=>{
@@ -114,10 +125,31 @@
       seen.add(p.id);p.stock-=i.quantity;
       return {productId:p.id,name:p.name,quantity:i.quantity,unitPrice:p.price};
     });
+    const totals=quote(snapshots,discountCode);
     const id='DEMO-'+crypto.randomUUID();
-    const order={id,date:new Date().toISOString().slice(0,10),customer:customer.trim(),email:email.trim(),status:'Processing',paymentStatus,source,notes:'',items:snapshots};
+    const order={id,date:new Date().toISOString().slice(0,10),customer:customer.trim(),email:email.trim(),status:'Processing',paymentStatus,source,notes:'',items:snapshots,discountCode:totals.discountCode,discountAmount:totals.discount};
     next.orders.unshift(order);save(next);return copy(order);
   }
+  function quote(items,code=''){
+    if(typeof code!=='string')throw Error('Enter a valid demo discount code.');
+    const discountCode=code.trim().toUpperCase();
+    const percent=discountCode?({WELCOME10:10,MERLOCK15:15})[discountCode]:0;
+    if(percent===undefined)throw Error('That demo code is not recognised. Try WELCOME10 or MERLOCK15.');
+    if(!Array.isArray(items)||items.some(i=>!Number.isFinite(i.unitPrice)||i.unitPrice<0||!Number.isSafeInteger(i.quantity)||i.quantity<1))throw Error('Invalid discount items.');
+    const cents=items.reduce((sum,i)=>sum+Math.round(i.unitPrice*100)*i.quantity,0);
+    const discount=Math.round(cents*percent/100);
+    return {subtotal:cents/100,discount:discount/100,total:(cents-discount)/100,discountCode,percent};
+  }
+  function reset(){
+    const next=copy(defaults);
+    try{
+      localStorage.setItem(key,JSON.stringify(next));
+      for(const name of ['merlock-bag-v1','merlock-wishlist-v1','merlock-coupon-v1','merlock-last-order-v1'])localStorage.removeItem(name);
+    }catch{throw Error('Your browser could not reset the demo. Enable local storage and try again.');}
+    window.dispatchEvent(new Event('meridian-demo-reset'));
+    window.dispatchEvent(new Event('meridian-store-change'));
+    return next;
+  }
   const escape = s => String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  window.MeridianStore={key,load,save,createOrder,validate,escape,statuses,money:n=>new Intl.NumberFormat('en-GB',{style:'currency',currency:'GBP'}).format(n),orderTotal:o=>o.items.reduce((sum,i)=>sum+i.quantity*i.unitPrice,0)};
+  window.MeridianStore={key,load,save,createOrder,validate,escape,statuses,quote,reset,money:n=>new Intl.NumberFormat('en-GB',{style:'currency',currency:'GBP'}).format(n),orderTotal:o=>(o.items.reduce((sum,i)=>sum+i.quantity*Math.round(i.unitPrice*100),0)-Math.round((o.discountAmount||0)*100))/100};
 })();

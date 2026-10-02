@@ -3,7 +3,7 @@ import {readFileSync,statSync,createReadStream} from 'node:fs';
 import {fileURLToPath} from 'node:url';
 import {dirname,join,resolve} from 'node:path';
 const root=dirname(fileURLToPath(import.meta.url));
-const files={'/':'index.html','/index.html':'index.html','/admin.html':'admin.html','/admin':'admin.html','/store.js':'store.js','/storefront.js':'storefront.js','/storefront.css':'storefront.css','/landing.js':'landing.js','/music.js':'music.js','/assets/music/chopin-prelude-a-major.mp3':'assets/music/chopin-prelude-a-major.mp3','/analytics.js':'analytics.js','/admin.js':'admin.js','/admin.css':'admin.css','/assets/watches/landing-page-video.mp4':'assets/watches/landing-page-video.mp4'};
+const files={'/':'index.html','/index.html':'index.html','/admin.html':'admin.html','/admin':'admin.html','/store.js':'store.js','/shop.js':'shop.js','/storefront.js':'storefront.js','/storefront.css':'storefront.css','/landing.js':'landing.js','/music.js':'music.js','/assets/music/chopin-prelude-a-major.mp3':'assets/music/chopin-prelude-a-major.mp3','/analytics.js':'analytics.js','/admin.js':'admin.js','/admin.css':'admin.css','/assets/watches/landing-page-video.mp4':'assets/watches/landing-page-video.mp4'};
 for (const name of ['champagne-moonphase','midnight-moonphase','landing-page-poster','emerald-gold','blue-steel','obsidian-black','silver-blue','two-tone-gmt','gold-rectangle','navy-moonphase','green-chronograph','pearl-two-tone','black-skeleton']) files['/assets/watches/'+name+'.webp']='assets/watches/'+name+'.webp';
 files['/assets/watches/landing-page-video.webm']='assets/watches/landing-page-video.webm';
 files['/assets/fonts/bodoni-moda.ttf']='assets/fonts/bodoni-moda.ttf';

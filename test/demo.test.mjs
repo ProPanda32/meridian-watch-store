@@ -5,7 +5,7 @@ import {randomUUID} from 'node:crypto';
 import vm from 'node:vm';
 
 const source=readFileSync(new URL('../store.js',import.meta.url),'utf8');
-function browser(storage=new Map(),fail=false){const events=[];const context={window:{dispatchEvent:e=>events.push(e.type)},localStorage:{getItem:k=>storage.get(k)||null,setItem:(k,v)=>{if(fail)throw Error('Unavailable');storage.set(k,v);}},URL,Event,crypto:{randomUUID}};vm.runInNewContext(source,context);return {store:context.window.MeridianStore,events,storage};}
+function browser(storage=new Map(),fail=false){const events=[];const context={window:{dispatchEvent:e=>events.push(e.type)},localStorage:{removeItem:k=>{if(fail)throw Error('Unavailable');storage.delete(k);},getItem:k=>storage.get(k)||null,setItem:(k,v)=>{if(fail)throw Error('Unavailable');storage.set(k,v);}},URL,Event,crypto:{randomUUID}};vm.runInNewContext(source,context);return {store:context.window.MeridianStore,events,storage};}
 test('storefront checkout appears in admin data with price snapshots and stock updates',()=>{
   const b=browser(),before=b.store.load();const order=b.store.createOrder({customer:'Demo shopper',email:'shopper@example.com',source:'Storefront',paymentStatus:'Demo — no payment',items:[{productId:'noir',quantity:2},{productId:'silver',quantity:1}]});
   assert.equal(b.store.orderTotal(order),535);assert.equal(order.source,'Storefront');assert.equal(order.status,'Processing');
@@ -131,4 +131,28 @@ test('demo trend history migrates once without changing saved orders, stock or s
   assert.equal(JSON.stringify(migrated.orders.filter(o=>!o.id.startsWith('DEMO-TREND-'))),original);
   assert.equal(migrated.products[0].stock,2);assert.equal(migrated.settings.name,'Custom store');
   b.store.save(migrated);assert.equal(b.store.load().orders.length,migrated.orders.length);
+});
+
+test('discount checkout stores an immutable discounted total and rejects unknown codes without saving',()=>{
+ const b=browser(),initial=b.store.load();
+ const order=b.store.createOrder({customer:'Demo',email:'demo@example.com',source:'Storefront',discountCode:' welcome10 ',items:[{productId:'noir',quantity:1}]});
+ assert.equal(order.discountCode,'WELCOME10');assert.equal(order.discountAmount,18.5);assert.equal(b.store.orderTotal(order),166.5);
+ const edited=b.store.load();edited.products[0].price=999;b.store.save(edited);assert.equal(b.store.orderTotal(b.store.load().orders[0]),166.5);
+ const before=JSON.stringify(b.store.load());assert.throws(()=>b.store.createOrder({customer:'Demo',email:'demo@example.com',discountCode:'invalid',items:[{productId:'silver',quantity:1}]}),/not recognised/);
+ assert.equal(JSON.stringify(b.store.load()),before);assert.equal(initial.products[0].stock-b.store.load().products[0].stock,1);
+ assert.equal(b.store.quote([{unitPrice:1.99,quantity:3}],'MERLOCK15').total,5.07);
+});
+test('demo reset restores catalogue history and settings and only clears this store shopping keys',()=>{
+ const b=browser(),initial=b.store.load(),edited=b.store.load();edited.products=[];edited.orders=[];edited.settings.name='Edited';b.store.save(edited);
+ for(const key of ['merlock-bag-v1','merlock-wishlist-v1','merlock-coupon-v1','merlock-last-order-v1'])b.storage.set(key,'changed');
+ b.storage.set('unrelated-app','keep');const reset=b.store.reset();
+ assert.equal(JSON.stringify(reset),JSON.stringify(initial));assert.equal(b.storage.get('unrelated-app'),'keep');assert.equal(b.storage.has('merlock-bag-v1'),false);assert.ok(b.events.includes('meridian-demo-reset'));
+});
+
+test('product galleries accept extra photos and preserve them across store saves',()=>{
+ const b=browser(),state=b.store.load();state.products[0].galleryImages=['https://example.com/detail.jpg','assets/watches/champagne-moonphase.webp'];b.store.save(state);
+ assert.equal(b.store.load().products[0].galleryImages.length,2);
+ for(const images of [['http://example.com/image.jpg'],Array(7).fill('https://example.com/a.jpg')]){
+   const invalid=b.store.load();invalid.products[0].galleryImages=images;assert.throws(()=>b.store.save(invalid),/photos|photo URLs/);
+ }
 });
