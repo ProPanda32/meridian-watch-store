@@ -245,6 +245,7 @@ function setGallery(view){
 $('detail-zoom').addEventListener('click',()=>{const button=$('detail-zoom');const zoomed=button.classList.toggle('is-zoomed');button.setAttribute('aria-pressed',String(zoomed));button.setAttribute('aria-label',zoomed?'Reset image zoom':'Zoom watch image');});
 $('wishlist-open').addEventListener('click',openWishlist);$('menu-wishlist').addEventListener('click',openWishlist);
 $('compare-open').addEventListener('click',()=>{renderComparison();$('compare-dialog').showModal();});
+$('filter-toggle').addEventListener('click',()=>{const button=$('filter-toggle');const expanded=button.getAttribute('aria-expanded')!=='true';button.setAttribute('aria-expanded',String(expanded));$('sort-filter-dropdown').hidden=!expanded;});
 $('collection-filters').addEventListener('input',render);
 $('collection-filters').addEventListener('change',render);
 $('collection-filters').addEventListener('submit',e=>e.preventDefault());

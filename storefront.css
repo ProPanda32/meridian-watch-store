@@ -301,12 +301,19 @@ select:focus-visible,textarea:focus-visible,summary:focus-visible{outline:2px so
 .gallery-thumbnails button[aria-pressed=true]{border:2px solid var(--ink)}
 .gallery-thumbnails img{display:block;width:100%;height:100%;object-fit:cover}
 
-.sort-filter-dropdown{border-top:1px solid var(--line);border-bottom:1px solid var(--line);margin-bottom:16px}
-.sort-filter-dropdown>summary{display:flex;align-items:center;gap:12px;list-style:none;min-height:52px;font-size:14px;cursor:pointer}
-.sort-filter-dropdown>summary::-webkit-details-marker{display:none}
-.sort-filter-dropdown>summary::after{content:"";width:8px;height:8px;border-right:1px solid currentColor;border-bottom:1px solid currentColor;transform:rotate(45deg);margin:0 4px 4px auto}
-.sort-filter-dropdown[open]>summary::after{transform:rotate(225deg);margin-bottom:-4px}
 #filter-active-count{font-size:11px;color:#62675f;background:#e7e7e0;border-radius:12px;padding:3px 8px}
-.sort-filter-dropdown[open]>.collection-filters{animation:filters-reveal .18s ease-out}
+.sort-filter-dropdown:not([hidden])>.collection-filters{animation:filters-reveal .18s ease-out}
 @keyframes filters-reveal{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
-@media(prefers-reduced-motion:reduce){.sort-filter-dropdown[open]>.collection-filters{animation:none}}
+@media(prefers-reduced-motion:reduce){.sort-filter-dropdown:not([hidden])>.collection-filters{animation:none}}
+
+.collection-tabs{margin-bottom:8px}
+.collection-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;border-bottom:1px solid var(--line);padding:4px 0 8px}
+.collection-toolbar .collection-tools{margin:0;gap:8px}
+.collection-toolbar .outline-button{padding:8px 12px;font-size:13px}
+.filter-toggle{display:flex;align-items:center;gap:10px;min-height:44px;padding:0;border:0;background:transparent;color:inherit;font-size:13px}
+.filter-toggle::after{content:"";width:7px;height:7px;border-right:1px solid currentColor;border-bottom:1px solid currentColor;transform:rotate(45deg);margin:0 2px 4px 2px}
+.filter-toggle[aria-expanded=true]::after{transform:rotate(225deg);margin-bottom:-4px}
+.sort-filter-dropdown{border-bottom:1px solid var(--line)}
+.sort-filter-dropdown .collection-filters{padding-top:16px}
+#collection-results{margin:12px 0 20px}
+@media(max-width:600px){.collection-toolbar{gap:6px}.collection-toolbar .collection-tools{gap:4px}.collection-toolbar .outline-button{padding:8px;font-size:12px}.filter-toggle{gap:6px;font-size:12px}.desktop-tool-label{display:none}.collection-toolbar .collection-tools span{margin-left:3px}}
