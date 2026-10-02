@@ -13,10 +13,19 @@
   let frame = 0;
   let filmProgress;
   let lastFrameTime;
+  const nativeScrollMotion = CSS.supports('animation-timeline', 'scroll(root block)') && CSS.supports('animation-range', '0px 24svh');
+  let heroTop = 0;
+  let heroTravel = 1;
+  function measureHero() {
+    heroTop = hero.getBoundingClientRect().top + window.scrollY;
+    heroTravel = Math.max(1, hero.offsetHeight - stage.offsetHeight);
+  }
+  measureHero();
 
   video.controls = false;
   toggle.hidden = false;
   document.documentElement.classList.add('motion-ready');
+  document.documentElement.classList.toggle('native-scroll-motion', nativeScrollMotion);
 
   function syncPlaybackButton() {
     const label = video.paused ? 'Play film' : 'Pause film';
@@ -56,20 +65,21 @@
   // Pin briefly, then let normal page scrolling carry the film out of view.
   function updateScroll(timestamp = performance.now()) {
     frame = 0;
-    const travel = hero.offsetHeight - stage.offsetHeight;
-    const progress = motion.matches ? 0 : Math.min(1, Math.max(0, -hero.getBoundingClientRect().top) / Math.max(1, travel));
+    const progress = motion.matches ? 0 : Math.min(1, Math.max(0, window.scrollY - heroTop) / heroTravel);
     // Ease endpoints and absorb wheel/touch steps with a short follow-through.
     // Use elapsed time so the response stays consistent across refresh rates.
     const target = progress * progress * (3 - 2 * progress);
     const elapsed = Math.min(64, Math.max(0, timestamp - (lastFrameTime ?? timestamp)));
     lastFrameTime = timestamp;
-    if(filmProgress === undefined || motion.matches) filmProgress = target;
+    if(filmProgress === undefined || motion.matches || nativeScrollMotion) filmProgress = target;
     else filmProgress += (target - filmProgress) * (1 - Math.exp(-elapsed / 90));
     if(Math.abs(target - filmProgress) < .0001) filmProgress = target;
     const opacity = Math.max(0, 1 - filmProgress * 1.3);
-    hero.style.setProperty('--film-scale', String(1 + filmProgress * .065));
-    hero.style.setProperty('--copy-y', `${-filmProgress * 40}px`);
-    hero.style.setProperty('--copy-opacity', String(opacity));
+    if(!nativeScrollMotion){
+      hero.style.setProperty('--film-scale', String(1 + filmProgress * .065));
+      hero.style.setProperty('--copy-y', `${-filmProgress * 40}px`);
+      hero.style.setProperty('--copy-opacity', String(opacity));
+    }
     copy.inert = opacity < .05;
     // Tie the header directly to scroll distance so reversing direction never
     // restarts a timed transition at a threshold.
@@ -85,7 +95,8 @@
     }
   }
   window.addEventListener('scroll', scheduleScroll, { passive: true });
-  window.addEventListener('resize', scheduleScroll);
+  window.addEventListener('resize', () => {measureHero();scheduleScroll();});
+  if('ResizeObserver' in window) new ResizeObserver(() => {measureHero();scheduleScroll();}).observe(hero);
   motion.addEventListener('change', () => {
     wantsPlayback = !motion.matches;
     syncPlayback();

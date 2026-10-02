@@ -188,3 +188,13 @@ dialog::backdrop{background:#0008}
 .bag-add-button.is-sold-out:disabled,.product-actions .bag-add-button.is-sold-out:disabled{background:#e7e7e0;border-color:#bfc2bb;color:var(--ink);opacity:1;cursor:not-allowed}
 
 @media(prefers-reduced-motion:reduce){.toast{transition:none}}
+
+/* Native scroll timelines keep the video transform in step with sticky scrolling. */
+@supports (animation-timeline:scroll(root block)) and (animation-range:0px 24svh){
+  @media(prefers-reduced-motion:no-preference){
+    .motion-ready.native-scroll-motion .hero-media{animation:hero-scroll-zoom 1s cubic-bezier(.42,0,.58,1) both;animation-timeline:scroll(root block);animation-range:0px 24svh;backface-visibility:hidden}
+    .motion-ready.native-scroll-motion .hero-copy{animation:hero-scroll-copy 1s cubic-bezier(.42,0,.58,1) both;animation-timeline:scroll(root block);animation-range:0px 24svh}
+  }
+}
+@keyframes hero-scroll-zoom{from{transform:translateZ(0) scale(1)}to{transform:translateZ(0) scale(1.065)}}
+@keyframes hero-scroll-copy{from{transform:translate3d(0,0,0);opacity:1}to{transform:translate3d(0,-40px,0);opacity:0}}
