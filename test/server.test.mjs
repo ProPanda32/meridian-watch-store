@@ -85,3 +85,11 @@ test('dress and sport product photos serve the exact bundled images',async()=>{
     assert.deepEqual(Buffer.from(await response.arrayBuffer()),readFileSync(new URL(`../assets/watches/${name}.webp`,import.meta.url)));
   }
 });
+
+test('distinct background images serve the exact bundled watch assets',async()=>{
+ const mapping=JSON.parse(readFileSync(new URL('../sources/background-masks/manifest.json',import.meta.url),'utf8'));
+ for(const path of Object.values(mapping)){
+  const response=await fetch(base+'/'+path);assert.equal(response.status,200);assert.equal(response.headers.get('content-type'),'image/webp');
+  assert.deepEqual(Buffer.from(await response.arrayBuffer()),readFileSync(new URL('../'+path,import.meta.url)));
+ }
+});

@@ -156,3 +156,15 @@ test('product galleries accept extra photos and preserve them across store saves
    const invalid=b.store.load();invalid.products[0].galleryImages=images;assert.throws(()=>b.store.save(invalid),/photos|photo URLs/);
  }
 });
+
+test('background colours update old catalogue images without changing watches or saved store data',()=>{
+ const b=browser(),state=b.store.load();const oldImages=JSON.parse(readFileSync(new URL('../sources/background-masks/manifest.json',import.meta.url),'utf8'));
+ for(const product of state.products){const entry=Object.entries(oldImages).find(([,current])=>current===product.image);if(entry)product.image=entry[0];}
+ const target=state.products.find(p=>p.id==='emerald-gold');target.stock=3;target.price=199;
+ const custom=state.products.find(p=>p.id==='blue-steel');custom.image='https://example.com/custom-watch.webp';
+ const orders=JSON.stringify(state.orders);const firstTwo=state.products.slice(0,2).map(p=>p.image);b.store.save(state);
+ const saved=b.store.load();assert.equal(saved.products.find(p=>p.id==='emerald-gold').image,oldImages['assets/watches/emerald-gold.webp']);
+ assert.equal(saved.products.find(p=>p.id==='emerald-gold').stock,3);assert.equal(saved.products.find(p=>p.id==='emerald-gold').price,199);
+ assert.equal(saved.products.find(p=>p.id==='blue-steel').image,custom.image);assert.equal(JSON.stringify(saved.orders),orders);
+ assert.deepEqual(saved.products.slice(0,2).map(p=>p.image),firstTwo);
+});

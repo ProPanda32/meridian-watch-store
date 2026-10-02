@@ -139,3 +139,9 @@ Collection cards and product details show Add to bag at zero quantity and matchi
 Analysis supports an inclusive date range, order-value/units/order-count charts, monthly differences, and best sellers filtered by month. Cancelled orders are excluded. Values include demo and unpaid orders, with recorded discounts deducted; they are not cash receipts. Monthly and product CSV exports respect the selected filters. Months without orders between the first and last month appear as zero values. Current or date-filtered months can be incomplete.
 
 Settings → Reset demo restores the twelve-watch catalogue, original stocks, sample order history and store settings, and clears saved watches, the bag, applied code and last order reference. A confirmation is required. Unrelated local-storage data and the current admin sign-in are retained. Export CSVs first if you want to keep the analysis.
+
+## Distinct watch backgrounds
+
+Watches 3–12 now use green, ocean-blue, violet, icy-blue, copper, burgundy, indigo, teal, blush and graphite backgrounds. ImageGen edits the background scene; the original watch is then restored through the protection masks in `sources/background-masks/`. Lossless WebP output retains the original image dimensions and protected watch pixels. The original images remain available for reference and existing gallery links. Aurelia and Selene are unchanged.
+
+`manifest.json` maps the previous bundled images to the new assets. Returning browsers update those default image paths while preserving custom image URLs, product edits and order history. New asset names avoid displaying a cached version of the previous background.
